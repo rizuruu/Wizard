@@ -7,6 +7,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.1f)
 	_frameCount = 0;
 	_paused = false;
 	_pKeyDown = false;
+
 	//Initialise important Game aspects
 	Graphics::Initialise(argc, argv, this, Graphics::GetViewportWidth(), Graphics::GetViewportHeight(), false, 25, 25, "Pacman", 60);
 	Input::Initialise();
@@ -31,6 +32,9 @@ void Pacman::LoadContent()
 	_pacmanTexture->Load("Textures/PacmanNew.png", false);
 	_pacmanPosition = new Vector2(350.0f, 350.0f);
 	_pacmanSourceRect = new Rect(0.0f, 0.0f, 28, 39);
+	_pacmanIdle2Rect = new Rect(28.0f, 0.0f, 28, 39);
+	_pacmanRun1Rect = new Rect(84.0f, 0.0f, 28, 39);
+	_pacmanRun2Rect = new Rect(112.0f, 0.0f, 28, 39);
 
 	// Load Munchie
 	_munchieBlueTexture = new Texture2D();
@@ -64,8 +68,14 @@ void Pacman::Update(int elapsedTime)
 		// Checks if D key is pressed
 
 		if (keyboardState->IsKeyDown(Input::Keys::D))
-
+		{
 			_pacmanPosition->X += _cPacmanSpeed * elapsedTime;
+			PState = PlayerState::Walking;
+		}
+		else
+		{
+			PState = PlayerState::Idle;
+		}
 
 		// Checks if Pacman is trying to disappear
 
@@ -96,7 +106,6 @@ void Pacman::Draw(int elapsedTime)
 	stream << "Pacman X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
-	SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, _pacmanSourceRect); // Draws Pacman
 
 
 	if (_paused)
@@ -111,19 +120,42 @@ void Pacman::Draw(int elapsedTime)
 		// Draws Red Munchie
 		SpriteBatch::Draw(_munchieInvertedTexture, _munchieRect, nullptr, Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
 
+		switch (PState)
+		{
+			case Pacman::PlayerState::Idle:
+				SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, _pacmanSourceRect); // Draws Pacman
+				break;
+			case Pacman::PlayerState::Walking:		
+				SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, _pacmanRun1Rect); // Draws Pacman
+				break;
+			default:
+				break;
+		}
+
 		_frameCount++;
 	}
 	else
 	{
 		// Draw Blue Munchie
 		SpriteBatch::Draw(_munchieBlueTexture, _munchieRect, nullptr, Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
-		
+
+		switch (PState)
+		{
+			case Pacman::PlayerState::Idle:
+				SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, _pacmanIdle2Rect); // Draws Pacman
+				break;
+			case Pacman::PlayerState::Walking:
+				SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, _pacmanRun2Rect); // Draws Pacman
+				break;
+			default:
+				break;
+		}
+
 		_frameCount++;
 
 		if (_frameCount >= 60)
 			_frameCount = 0;
-	}
-	
+	}	
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
 	SpriteBatch::EndDraw(); // Ends Drawing

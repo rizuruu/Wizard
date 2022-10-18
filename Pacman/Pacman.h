@@ -23,6 +23,9 @@ private:
 	// Data to represent Pacman
 	Vector2* _pacmanPosition;
 	Rect* _pacmanSourceRect;
+	Rect* _pacmanIdle2Rect;
+	Rect* _pacmanRun1Rect;
+	Rect* _pacmanRun2Rect;
 	Texture2D* _pacmanTexture;
 
 	// Data to represent Munchie
@@ -58,4 +61,12 @@ public:
 	void virtual Draw(int elapsedTime);
 
 	const float _cPacmanSpeed = 0.1f;
+
+	enum class PlayerState
+	{
+		Idle,
+		Walking,
+	};
+	
+	PlayerState PState = PlayerState::Idle;
 };
