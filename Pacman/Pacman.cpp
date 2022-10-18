@@ -28,9 +28,9 @@ void Pacman::LoadContent()
 {
 	// Load Pacman
 	_pacmanTexture = new Texture2D();
-	_pacmanTexture->Load("Textures/Pacman.tga", false);
+	_pacmanTexture->Load("Textures/PacmanNew.png", false);
 	_pacmanPosition = new Vector2(350.0f, 350.0f);
-	_pacmanSourceRect = new Rect(0.0f, 0.0f, 32, 32);
+	_pacmanSourceRect = new Rect(0.0f, 0.0f, 28, 39);
 
 	// Load Munchie
 	_munchieBlueTexture = new Texture2D();
