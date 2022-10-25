@@ -10,7 +10,8 @@
 
 // Just need to include main header file
 #include "S2D/S2D.h"
-
+#include <list>
+#include <vector>
 // Reduces the amount of typing by including all classes in S2D namespace
 using namespace S2D;
 
@@ -43,6 +44,14 @@ private:
 	Vector2* _menuStringPosition; 
 	bool _paused;
 	bool _pKeyDown;
+
+	int _pacmanFrame;
+	int _pacmanCurrentFrameTime;
+	const int _cPacmanFrameTime;
+
+	vector<Rect*> PlayerIdleFrames;
+	Vector2 IdleFramesVector;
+	int time;
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>
