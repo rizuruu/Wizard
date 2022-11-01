@@ -1,6 +1,9 @@
 #include "Pacman.h"
 #include <vector>
+#include <chrono>
+#include <thread>
 #include <sstream>
+using namespace std;
 
 Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.1f), _cPacmanFrameTime(250)
 {
@@ -10,8 +13,8 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.1f), 
 	_pacmanCurrentFrameTime = 0;
 	_pacmanFrame = 0;
 	IdleFramesVector = S2D::Vector2(6, 5);
-	PlayerIdleFrames = new vector<Rect>;
-
+	time = 0;
+                    
 	//Initialise important Game aspects
 	Graphics::Initialise(argc, argv, this, Graphics::GetViewportWidth(), Graphics::GetViewportHeight(), false, 25, 25, "Pacman", 60);
 	Input::Initialise();
@@ -32,18 +35,20 @@ Pacman::~Pacman()
 
 void Pacman::LoadContent()
 {
+	using namespace std::this_thread;     // sleep_for, sleep_until
+	using namespace std::chrono_literals; // ns, us, ms, s, h, etc.
+	using std::chrono::system_clock;
 
 	// Load Pacman
 	_pacmanTexture = new Texture2D();
 	_pacmanTexture->Load("Textures/Ghost2_Idle.png", false);
 	_pacmanPosition = new Vector2(350.0f, 350.0f);
 
-	for (int i = 0; i <= IdleFramesVector.X; i++)
+	for (int i = 0; i < IdleFramesVector.Y; i++)
 	{
-		PlayerIdleFrames[i] = new Rect(0.0f * i, 0.0f, 847, 864);
-		if (i == IdleFramesVector.X)
+		for (int j = 0; j < IdleFramesVector.X; j++)
 		{
-			PlayerIdleFrames[i] = new Rect(0.0f * i, 0.0f, 847, 864);
+			PlayerIdleFrames[i+j] = new Rect(847.0f * j, 864.0f * i, 847, 864);
 		}
 	}
 
@@ -85,7 +90,7 @@ void Pacman::Update(int elapsedTime)
 
 	// Gets the current state of the keyboard
 	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
-
+	
 	if (!_paused)
 
 	{
@@ -128,7 +133,7 @@ void Pacman::Draw(int elapsedTime)
 {
 	// Allows us to easily create a string
 	std::stringstream stream;
-	stream << "Pacman X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y;
+	stream << "Pacman X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y << " frame: " << time;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
 
@@ -140,15 +145,7 @@ void Pacman::Draw(int elapsedTime)
 		SpriteBatch::Draw(_menuBackground, _menuRectangle, nullptr); SpriteBatch::DrawString(menuStream.str().c_str(), _menuStringPosition, Color::Red);
 	}
 
-	time += elapsedTime;
-	
-	if (time < PlayerIdleFrames.size())
-	{
-		_pacmanSourceRect = PlayerIdleFrames.at(3);
-		SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, _pacmanSourceRect);
-	}
-	else
-		time = 0;
+	DrawPlayerAnimation(elapsedTime);
 
 	//if (_frameCount < 30)
 	//{
@@ -195,4 +192,21 @@ void Pacman::Draw(int elapsedTime)
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
 	SpriteBatch::EndDraw(); // Ends Drawing
+}
+
+void Pacman::DrawPlayerAnimation(int elapsedTime)
+{
+	Sleep(80);
+	time++;
+
+	if (time < size(PlayerIdleFrames))
+	{
+		_pacmanSourceRect = PlayerIdleFrames[time];
+		SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, PlayerIdleFrames[time]);
+	}
+	else
+	{
+		time = 0;
+		SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, PlayerIdleFrames[0]);
+	}
 }

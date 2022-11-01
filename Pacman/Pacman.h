@@ -49,7 +49,7 @@ private:
 	int _pacmanCurrentFrameTime;
 	const int _cPacmanFrameTime;
 
-	vector<Rect*> PlayerIdleFrames;
+	Rect* PlayerIdleFrames[9];
 	Vector2 IdleFramesVector;
 	int time;
 
@@ -68,6 +68,8 @@ public:
 
 	/// <summary> Called every frame - draw game here. </summary>
 	void virtual Draw(int elapsedTime);
+
+	void virtual DrawPlayerAnimation(int elapsedTime);
 
 	const float _cPacmanSpeed = 0.1f;
 
