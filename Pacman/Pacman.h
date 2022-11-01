@@ -24,11 +24,13 @@ private:
 	// Data to represent Pacman
 	Vector2* _pacmanPosition;
 	Rect* _pacmanSourceRect;
-	Rect* _pacmanIdle2Rect;
-	Rect* _pacmanRun1Rect;
-	Rect* _pacmanRun2Rect;
 	Texture2D* _pacmanTexture;
-
+	Texture2D* _RunTexture;
+	Texture2D* _AttackTexture;
+	Rect* PlayerIdleFrames[24];
+	Rect* PlayerRunFrames[22];
+	Rect* PlayerAttackFrames[21];
+	
 	// Data to represent Munchie
 	int _frameCount;
 	Rect* _munchieRect;
@@ -49,9 +51,10 @@ private:
 	int _pacmanCurrentFrameTime;
 	const int _cPacmanFrameTime;
 
-	Rect* PlayerIdleFrames[9];
 	Vector2 IdleFramesVector;
-	int time;
+	Vector2 RunFramesVector;
+	Vector2 AttackFramesVector;
+	int CurrentFrame;
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>
@@ -70,13 +73,18 @@ public:
 	void virtual Draw(int elapsedTime);
 
 	void virtual DrawPlayerAnimation(int elapsedTime);
+	void virtual IdleAnimation(int elapsedTime);
+	void virtual RunAnimation(int elapsedTime);
+	void virtual AttackAnimation(int elapsedTime);
+	void virtual InputHandler(int elapsedTime);
 
 	const float _cPacmanSpeed = 0.1f;
 
 	enum class PlayerState
 	{
 		Idle,
-		Walking,
+		Running,
+		Attacking,
 	};
 	
 	PlayerState PState = PlayerState::Idle;

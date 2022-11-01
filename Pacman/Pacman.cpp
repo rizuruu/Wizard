@@ -5,18 +5,19 @@
 #include <sstream>
 using namespace std;
 
-Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.1f), _cPacmanFrameTime(250)
+Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), _cPacmanFrameTime(250)
 {
 	_frameCount = 0;
 	_paused = false;
 	_pKeyDown = false;
 	_pacmanCurrentFrameTime = 0;
 	_pacmanFrame = 0;
-	IdleFramesVector = S2D::Vector2(6, 5);
-	time = 0;
+	IdleFramesVector = S2D::Vector2(6, 4);
+	AttackFramesVector = S2D::Vector2(5, 5);
+	CurrentFrame = 0;
                     
 	//Initialise important Game aspects
-	Graphics::Initialise(argc, argv, this, Graphics::GetViewportWidth(), Graphics::GetViewportHeight(), false, 25, 25, "Pacman", 60);
+	Graphics::Initialise(argc, argv, this, 1080, 720, false, 25, 25, "Pacman", 60);
 	Input::Initialise();
 
 	
@@ -41,21 +42,44 @@ void Pacman::LoadContent()
 
 	// Load Pacman
 	_pacmanTexture = new Texture2D();
+	_RunTexture = new Texture2D();
+	_AttackTexture = new Texture2D();
 	_pacmanTexture->Load("Textures/Ghost2_Idle.png", false);
+	_RunTexture->Load("Textures/Ghost2_run.png", false);
+	_AttackTexture->Load("Textures/Ghost2_Attack.png", false);
 	_pacmanPosition = new Vector2(350.0f, 350.0f);
+	int t = 0;
 
 	for (int i = 0; i < IdleFramesVector.Y; i++)
 	{
 		for (int j = 0; j < IdleFramesVector.X; j++)
 		{
-			PlayerIdleFrames[i+j] = new Rect(847.0f * j, 864.0f * i, 847, 864);
+			PlayerIdleFrames[t] = new Rect(847.0f * j, 864.0f * i, 847, 864);
+			t++;
+		}
+	}
+
+	t = 0;
+	for (int i = 0; i < IdleFramesVector.Y; i++)
+	{
+		for (int j = 0; j < IdleFramesVector.X; j++)
+		{
+			PlayerRunFrames[t] = new Rect(847.0f * j, 864.0f * i, 847, 864);
+			t++;
+		}
+	}
+
+	t = 0;
+	for (int i = 0; i < AttackFramesVector.Y; i++)
+	{
+		for (int j = 0; j < AttackFramesVector.X; j++)
+		{
+			PlayerAttackFrames[t] = new Rect(847.0f * j, 864.0f * i, 847, 864);
+			t++;
 		}
 	}
 
 	_pacmanSourceRect = new Rect(0.0f, 0.0f, 847, 864);
-	_pacmanIdle2Rect = new Rect(28.0f, 0.0f, 28, 39);
-	_pacmanRun1Rect = new Rect(84.0f, 0.0f, 28, 39);
-	_pacmanRun2Rect = new Rect(112.0f, 0.0f, 28, 39);
 
 	// Load Munchie
 	_munchieBlueTexture = new Texture2D();
@@ -79,54 +103,7 @@ void Pacman::LoadContent()
 
 void Pacman::Update(int elapsedTime)
 {
-	_pacmanCurrentFrameTime += elapsedTime;
-
-	if (_pacmanCurrentFrameTime > _cPacmanFrameTime)
-	{
-		_pacmanFrame++;
-		if (_pacmanFrame >= 2)
-			_pacmanFrame >= 2;
-	}
-
-	// Gets the current state of the keyboard
-	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
-	
-	if (!_paused)
-
-	{
-
-		// Checks if D key is pressed
-
-		if (keyboardState->IsKeyDown(Input::Keys::D))
-		{
-			_pacmanPosition->X += _cPacmanSpeed * elapsedTime;
-			PState = PlayerState::Walking;
-		}
-		else
-		{
-			PState = PlayerState::Idle;
-		}
-
-		// Checks if Pacman is trying to disappear
-
-		if (_pacmanPosition->X > Graphics::GetViewportWidth())
-
-		{
-
-			// Pacman hit right wall - reset his position
-
-			_pacmanPosition->X = -_pacmanSourceRect->Width;
-
-		}
-	}
-
-	if (keyboardState->IsKeyDown(Input::Keys::P) && !_pKeyDown)
-	{
-		_pKeyDown = true;
-		_paused = !_paused;
-	}
-	if (keyboardState->IsKeyUp(Input::Keys::P))
-		_pKeyDown = false;
+	InputHandler(elapsedTime);
 }
 
 void Pacman::Draw(int elapsedTime)
@@ -147,66 +124,118 @@ void Pacman::Draw(int elapsedTime)
 
 	DrawPlayerAnimation(elapsedTime);
 
-	//if (_frameCount < 30)
-	//{
-	//	// Draws Red Munchie
-	//	SpriteBatch::Draw(_munchieInvertedTexture, _munchieRect, nullptr, Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
-
-	//	switch (PState)
-	//	{
-	//		case Pacman::PlayerState::Idle:
-	//			SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, _pacmanSourceRect); // Draws Pacman
-	//			break;
-	//		case Pacman::PlayerState::Walking:		
-	//			SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, _pacmanRun1Rect); // Draws Pacman
-	//			break;
-	//		default:
-	//			break;
-	//	}
-
-	//	_frameCount++;
-	//}
-	//else
-	//{
-	//	// Draw Blue Munchie
-	//	SpriteBatch::Draw(_munchieBlueTexture, _munchieRect, nullptr, Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
-
-	//	switch (PState)
-	//	{
-	//		case Pacman::PlayerState::Idle:
-	//			SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, _pacmanIdle2Rect); // Draws Pacman
-	//			break;
-	//		case Pacman::PlayerState::Walking:
-	//			SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, _pacmanRun2Rect); // Draws Pacman
-	//			break;
-	//		default:
-	//			break;
-	//	}
-
-	//	_frameCount++;
-
-	//	if (_frameCount >= 60)
-	//		_frameCount = 0;
-	//}	
-
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
 	SpriteBatch::EndDraw(); // Ends Drawing
 }
 
+void Pacman::InputHandler(int elapsedTime)
+{
+	// Gets the current state of the keyboard
+	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
+	Input::MouseState* mouseState = Input::Mouse::GetState();
+
+	if (!_paused)
+	{
+		if (keyboardState->IsKeyDown(Input::Keys::W))
+		{
+			_pacmanPosition->Y -= _cPacmanSpeed * elapsedTime;
+			PState = PlayerState::Idle;
+		}
+		else if (keyboardState->IsKeyDown(Input::Keys::A))
+		{
+			_pacmanPosition->X -= _cPacmanSpeed * elapsedTime;
+			PState = PlayerState::Running;
+		}
+		else if (keyboardState->IsKeyDown(Input::Keys::S))
+		{
+			_pacmanPosition->Y += _cPacmanSpeed * elapsedTime;
+			PState = PlayerState::Idle;
+		}
+		else if (keyboardState->IsKeyDown(Input::Keys::D))
+		{
+			_pacmanPosition->X += _cPacmanSpeed * elapsedTime;
+			PState = PlayerState::Running;
+		}
+		else if (keyboardState->IsKeyDown(Input::Keys::SPACE))
+		{
+			PState = PlayerState::Attacking;
+		}
+		else
+		{
+			PState = PlayerState::Idle;
+		}
+
+		if (_pacmanPosition->X > Graphics::GetViewportWidth())
+		{
+			_pacmanPosition->X = -_pacmanSourceRect->Width;
+		}
+	}
+
+	if (keyboardState->IsKeyDown(Input::Keys::P) && !_pKeyDown)
+	{
+		_pKeyDown = true;
+		_paused = !_paused;
+	}
+	if (keyboardState->IsKeyUp(Input::Keys::P))
+		_pKeyDown = false;
+
+}
+
 void Pacman::DrawPlayerAnimation(int elapsedTime)
 {
-	Sleep(80);
-	time++;
+	Sleep(40);
+	CurrentFrame++;
 
-	if (time < size(PlayerIdleFrames))
+	switch (PState)
 	{
-		_pacmanSourceRect = PlayerIdleFrames[time];
-		SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, PlayerIdleFrames[time]);
+		case PlayerState::Idle:
+			IdleAnimation(elapsedTime);
+			break;
+		case PlayerState::Running:
+			RunAnimation(elapsedTime);
+			break;
+		case PlayerState::Attacking:
+			AttackAnimation(elapsedTime);
+			break;
+	}
+}
+
+void Pacman::IdleAnimation(int elapsedTime)
+{
+	if (CurrentFrame < size(PlayerIdleFrames))
+	{
+		SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, PlayerIdleFrames[CurrentFrame]);
 	}
 	else
 	{
-		time = 0;
+		CurrentFrame = 0;
 		SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, PlayerIdleFrames[0]);
+	}
+}
+
+void Pacman::RunAnimation(int elapsedTime)
+{
+	if (CurrentFrame < size(PlayerRunFrames))
+	{
+		SpriteBatch::Draw(_RunTexture, _pacmanPosition, PlayerRunFrames[CurrentFrame]);
+	}
+	else
+	{
+		CurrentFrame = 0;
+		SpriteBatch::Draw(_RunTexture, _pacmanPosition, PlayerRunFrames[0]);
+	}
+}
+
+void Pacman::AttackAnimation(int elapsedTime)
+{
+	if (CurrentFrame < size(PlayerAttackFrames))
+	{
+		SpriteBatch::Draw(_AttackTexture, _pacmanPosition, PlayerAttackFrames[CurrentFrame]);
+	}
+	else
+	{
+		CurrentFrame = 0;
+		SpriteBatch::Draw(_AttackTexture, _pacmanPosition, PlayerAttackFrames[0]);
 	}
 }
