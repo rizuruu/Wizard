@@ -56,6 +56,8 @@ private:
 	Vector2 AttackFramesVector;
 	int CurrentFrame;
 
+	AnimationSequence* anim;
+
 public:
 	/// <summary> Constructs the Pacman class. </summary>
 	Pacman(int argc, char* argv[]);

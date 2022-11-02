@@ -15,9 +15,10 @@ private:
 	Texture2D* SourceTexture;
 	Rect* SourceRect;
 	Vector2 v_FramesCount;
-
-	Rect* AnimationFrames[1];
+	int FramesCount;
+	Rect* AnimationFrames[24];
 public:
-	AnimationSequence(int argc, char* argv[]);
+	AnimationSequence();
 	void virtual PlaySequence(Sequence sequence);
+	void virtual Initialize(Rect t);
 };

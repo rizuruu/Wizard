@@ -1,4 +1,5 @@
 #include "Pacman.h"
+#include "AnimationSequence.h"
 #include <vector>
 #include <chrono>
 #include <thread>
@@ -19,7 +20,6 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	//Initialise important Game aspects
 	Graphics::Initialise(argc, argv, this, 1080, 720, false, 25, 25, "Pacman", 60);
 	Input::Initialise();
-
 	
 	// Start the Game Loop - This calls Update and Draw in game loop
 	Graphics::StartGameLoop();
@@ -39,6 +39,8 @@ void Pacman::LoadContent()
 	using namespace std::this_thread;     // sleep_for, sleep_until
 	using namespace std::chrono_literals; // ns, us, ms, s, h, etc.
 	using std::chrono::system_clock;
+
+	anim = new AnimationSequence();
 
 	// Load Pacman
 	_pacmanTexture = new Texture2D();
@@ -229,6 +231,7 @@ void Pacman::RunAnimation(int elapsedTime)
 
 void Pacman::AttackAnimation(int elapsedTime)
 {
+	anim->PlaySequence();
 	if (CurrentFrame < size(PlayerAttackFrames))
 	{
 		SpriteBatch::Draw(_AttackTexture, _pacmanPosition, PlayerAttackFrames[CurrentFrame]);

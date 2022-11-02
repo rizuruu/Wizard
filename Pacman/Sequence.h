@@ -9,4 +9,5 @@ public:
 	Vector2 GridVector;
 	int FramesCount;
 	Texture2D SourceTexture;
+	Rect SourceRect;
 };
