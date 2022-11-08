@@ -15,7 +15,7 @@ private:
 	Rect* SourceRect;
 	Vector2* v_FramesCount;
 	int FramesCount;
-	Rect* AnimationFrames[];
+	Rect* AnimationFrames[100];
 public:
 	AnimationSequence();
 	void virtual PlaySequence(Vector2* pos);

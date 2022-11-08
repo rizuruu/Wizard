@@ -13,7 +13,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	_pKeyDown = false;
 	_pacmanCurrentFrameTime = 0;
 	_pacmanFrame = 0;
-	IdleFramesVector = S2D::Vector2(6, 4);
+	IdleFramesVector = new S2D::Vector2(6, 4);
 	AttackFramesVector = new S2D::Vector2(5, 5);
 	CurrentFrame = 0;
                     
@@ -40,7 +40,10 @@ void Pacman::LoadContent()
 	using namespace std::chrono_literals; // ns, us, ms, s, h, etc.
 	using std::chrono::system_clock;
 
-	anim = new AnimationSequence();
+	IdleAnimator = new AnimationSequence();
+	RunAnimator = new AnimationSequence();
+	AttackAnimator = new AnimationSequence();
+
 	// Load Pacman
 	_pacmanTexture = new Texture2D();
 	_RunTexture = new Texture2D();
@@ -51,36 +54,9 @@ void Pacman::LoadContent()
 	_pacmanPosition = new Vector2(350.0f, 350.0f);
 	int t = 0;
 
-	anim->Initialize(_AttackTexture, 21, AttackFramesVector);
-
-	for (int i = 0; i < IdleFramesVector.Y; i++)
-	{
-		for (int j = 0; j < IdleFramesVector.X; j++)
-		{
-			PlayerIdleFrames[t] = new Rect(847.0f * j, 864.0f * i, 847, 864);
-			t++;
-		}
-	}
-
-	t = 0;
-	for (int i = 0; i < IdleFramesVector.Y; i++)
-	{
-		for (int j = 0; j < IdleFramesVector.X; j++)
-		{
-			PlayerRunFrames[t] = new Rect(847.0f * j, 864.0f * i, 847, 864);
-			t++;
-		}
-	}
-
-	t = 0;
-	//for (int i = 0; i < AttackFramesVector->Y; i++)
-	//{
-	//	for (int j = 0; j < AttackFramesVector->X; j++)
-	//	{
-	//		PlayerAttackFrames[t] = new Rect(847.0f * j, 864.0f * i, 847, 864);
-	//		t++;
-	//	}
-	//}
+	IdleAnimator->Initialize(_pacmanTexture, 24, IdleFramesVector);
+	RunAnimator->Initialize(_RunTexture, 22, IdleFramesVector);
+	AttackAnimator->Initialize(_AttackTexture, 21, AttackFramesVector);
 
 	_pacmanSourceRect = new Rect(0.0f, 0.0f, 847, 864);
 
@@ -193,53 +169,13 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 	switch (PState)
 	{
 		case PlayerState::Idle:
-			IdleAnimation(elapsedTime);
+			IdleAnimator->PlaySequence(_pacmanPosition);
 			break;
 		case PlayerState::Running:
-			RunAnimation(elapsedTime);
+			RunAnimator->PlaySequence(_pacmanPosition);
 			break;
 		case PlayerState::Attacking:
-			AttackAnimation(elapsedTime);
+			AttackAnimator->PlaySequence(_pacmanPosition);
 			break;
 	}
-}
-
-void Pacman::IdleAnimation(int elapsedTime)
-{
-	if (CurrentFrame < size(PlayerIdleFrames))
-	{
-		SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, PlayerIdleFrames[CurrentFrame]);
-	}
-	else
-	{
-		CurrentFrame = 0;
-		SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, PlayerIdleFrames[0]);
-	}
-}
-
-void Pacman::RunAnimation(int elapsedTime)
-{
-	if (CurrentFrame < size(PlayerRunFrames))
-	{
-		SpriteBatch::Draw(_RunTexture, _pacmanPosition, PlayerRunFrames[CurrentFrame]);
-	}
-	else
-	{
-		CurrentFrame = 0;
-		SpriteBatch::Draw(_RunTexture, _pacmanPosition, PlayerRunFrames[0]);
-	}
-}
-
-void Pacman::AttackAnimation(int elapsedTime)
-{
-	anim->PlaySequence(_pacmanPosition);
-	/*if (CurrentFrame < size(PlayerAttackFrames))
-	{
-		SpriteBatch::Draw(_AttackTexture, _pacmanPosition, PlayerAttackFrames[CurrentFrame]);
-	}
-	else
-	{
-		CurrentFrame = 0;
-		SpriteBatch::Draw(_AttackTexture, _pacmanPosition, PlayerAttackFrames[0]);
-	}*/
 }

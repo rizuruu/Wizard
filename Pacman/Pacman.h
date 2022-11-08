@@ -52,12 +52,14 @@ private:
 	int _pacmanCurrentFrameTime;
 	const int _cPacmanFrameTime;
 
-	Vector2 IdleFramesVector;
+	Vector2* IdleFramesVector;
 	Vector2 RunFramesVector;
 	Vector2* AttackFramesVector;
 	int CurrentFrame;
 
-	AnimationSequence* anim;
+	AnimationSequence* IdleAnimator;
+	AnimationSequence* RunAnimator;
+	AnimationSequence* AttackAnimator;
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>
@@ -76,9 +78,6 @@ public:
 	void virtual Draw(int elapsedTime);
 
 	void virtual DrawPlayerAnimation(int elapsedTime);
-	void virtual IdleAnimation(int elapsedTime);
-	void virtual RunAnimation(int elapsedTime);
-	void virtual AttackAnimation(int elapsedTime);
 	void virtual InputHandler(int elapsedTime);
 
 	const float _cPacmanSpeed = 0.1f;
