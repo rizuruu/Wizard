@@ -14,7 +14,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	_pacmanCurrentFrameTime = 0;
 	_pacmanFrame = 0;
 	IdleFramesVector = S2D::Vector2(6, 4);
-	AttackFramesVector = S2D::Vector2(5, 5);
+	AttackFramesVector = new S2D::Vector2(5, 5);
 	CurrentFrame = 0;
                     
 	//Initialise important Game aspects
@@ -41,7 +41,6 @@ void Pacman::LoadContent()
 	using std::chrono::system_clock;
 
 	anim = new AnimationSequence();
-
 	// Load Pacman
 	_pacmanTexture = new Texture2D();
 	_RunTexture = new Texture2D();
@@ -51,6 +50,8 @@ void Pacman::LoadContent()
 	_AttackTexture->Load("Textures/Ghost2_Attack.png", false);
 	_pacmanPosition = new Vector2(350.0f, 350.0f);
 	int t = 0;
+
+	anim->Initialize(_AttackTexture, 21, AttackFramesVector);
 
 	for (int i = 0; i < IdleFramesVector.Y; i++)
 	{
@@ -72,14 +73,14 @@ void Pacman::LoadContent()
 	}
 
 	t = 0;
-	for (int i = 0; i < AttackFramesVector.Y; i++)
-	{
-		for (int j = 0; j < AttackFramesVector.X; j++)
-		{
-			PlayerAttackFrames[t] = new Rect(847.0f * j, 864.0f * i, 847, 864);
-			t++;
-		}
-	}
+	//for (int i = 0; i < AttackFramesVector->Y; i++)
+	//{
+	//	for (int j = 0; j < AttackFramesVector->X; j++)
+	//	{
+	//		PlayerAttackFrames[t] = new Rect(847.0f * j, 864.0f * i, 847, 864);
+	//		t++;
+	//	}
+	//}
 
 	_pacmanSourceRect = new Rect(0.0f, 0.0f, 847, 864);
 
@@ -231,8 +232,8 @@ void Pacman::RunAnimation(int elapsedTime)
 
 void Pacman::AttackAnimation(int elapsedTime)
 {
-	anim->PlaySequence();
-	if (CurrentFrame < size(PlayerAttackFrames))
+	anim->PlaySequence(_pacmanPosition);
+	/*if (CurrentFrame < size(PlayerAttackFrames))
 	{
 		SpriteBatch::Draw(_AttackTexture, _pacmanPosition, PlayerAttackFrames[CurrentFrame]);
 	}
@@ -240,5 +241,5 @@ void Pacman::AttackAnimation(int elapsedTime)
 	{
 		CurrentFrame = 0;
 		SpriteBatch::Draw(_AttackTexture, _pacmanPosition, PlayerAttackFrames[0]);
-	}
+	}*/
 }

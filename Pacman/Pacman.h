@@ -12,6 +12,7 @@
 #include "S2D/S2D.h"
 #include <list>
 #include <vector>
+#include "AnimationSequence.h"
 // Reduces the amount of typing by including all classes in S2D namespace
 using namespace S2D;
 
@@ -53,7 +54,7 @@ private:
 
 	Vector2 IdleFramesVector;
 	Vector2 RunFramesVector;
-	Vector2 AttackFramesVector;
+	Vector2* AttackFramesVector;
 	int CurrentFrame;
 
 	AnimationSequence* anim;

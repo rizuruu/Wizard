@@ -9,5 +9,6 @@ public:
 	Vector2 GridVector;
 	int FramesCount;
 	Texture2D SourceTexture;
-	Rect SourceRect;
+	Rect* SourceRect;
+	Vector2* Position;
 };

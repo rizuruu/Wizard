@@ -11,14 +11,13 @@ class AnimationSequence
 private:
 	int CurrentFrame = 0;
 	Vector2* _pacmanPosition;
-	static const int t;
 	Texture2D* SourceTexture;
 	Rect* SourceRect;
-	Vector2 v_FramesCount;
+	Vector2* v_FramesCount;
 	int FramesCount;
-	Rect* AnimationFrames[24];
+	Rect* AnimationFrames[];
 public:
 	AnimationSequence();
-	void virtual PlaySequence(Sequence sequence);
-	void virtual Initialize(Rect t);
+	void virtual PlaySequence(Vector2* pos);
+	void virtual Initialize(Texture2D* Source, int FramesCount, Vector2* grid);
 };
