@@ -98,10 +98,12 @@ void Pacman::Draw(int elapsedTime)
 
 	{
 		std::stringstream menuStream; menuStream << "PAUSED!";
+		_menuStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
 		SpriteBatch::Draw(_menuBackground, _menuRectangle, nullptr); SpriteBatch::DrawString(menuStream.str().c_str(), _menuStringPosition, Color::Red);
 	}
 
-	DrawPlayerAnimation(elapsedTime);
+	if (!_paused)
+		DrawPlayerAnimation(elapsedTime);
 
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
