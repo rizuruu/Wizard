@@ -18,7 +18,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	_pacmanFrame = 0;
 	IdleFramesVector = new S2D::Vector2(20, 1);
 	AttackFramesVector = new S2D::Vector2(5, 5);
-	FlowerFramesVector = new S2D::Vector2(8, 8);
+	FlowerFramesVector = new S2D::Vector2(10, 6);
 	CurrentFrame = 0;
 	RECT desktop;
 	// Get a handle to the desktop window
@@ -60,7 +60,7 @@ void Pacman::LoadContent()
 	Flower = new Texture2D();
 	_pacmanTexture->Load("Textures/PlayerIdle.png", false);
 	Platform->Load("Textures/Platform.png", false);
-	Flower->Load("Textures/f.png", false);
+	Flower->Load("Textures/Flower.png", false);
 	_RunTexture->Load("Textures/PlayerWalk.png", false);
 	_AttackTexture->Load("Textures/Ghost2_Attack.png", false);
 	_pacmanPosition = new Vector2(-128.0f, (Graphics::GetViewportHeight()/2 + 64));
@@ -76,7 +76,7 @@ void Pacman::LoadContent()
 	sequence.height = 512;
 	IdleAnimator->Initialize(sequence);
 
-	//FlowerAnimator->Initialize(Flower, 60, FlowerFramesVector, 768, 768);
+	FlowerAnimator->Initialize(Flower, 60, FlowerFramesVector, 768, 768);
 
 	_pacmanSourceRect = new Rect(0.0f, 0.0f, 847, 864);
 
@@ -124,7 +124,7 @@ void Pacman::Draw(int elapsedTime)
 	if (!_paused)
 		DrawPlayerAnimation(elapsedTime);
 
-	//FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight()/6), false);
+	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() - 256), false, 0.3f);
 
 	SpriteBatch::Draw(Platform, new Vector2(-20, Graphics::GetViewportHeight() - 124), new Rect(0, 1550, 2048, 498), Vector2::Zero, 0.5f, 0.0f, Color::White, SpriteEffect::NONE);
 	SpriteBatch::Draw(Platform, new Vector2(900, Graphics::GetViewportHeight() - 124), new Rect(0, 1550, 2048, 498), Vector2::Zero, 0.5f, 0.0f, Color::White, SpriteEffect::NONE);
@@ -168,7 +168,7 @@ void Pacman::InputHandler(int elapsedTime)
 		}
 		else if (keyboardState->IsKeyDown(Input::Keys::SPACE))
 		{
-			PState = PlayerState::Attacking;
+			PState = PlayerState::Jumping;
 		}
 		else if (mouseState->LeftButton == Input::ButtonState::PRESSED)
 			PState = PlayerState::Attacking;
@@ -205,6 +205,9 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 			break;
 		case PlayerState::Running:
 			RunAnimator->PlaySequence(_pacmanPosition, isFlipped);
+			break;
+		case PlayerState::Jumping:
+			//JumpAnimator->PlaySequenceOnce()
 			break;
 		case PlayerState::Attacking:
 			if (AttackAnimator->PlaySequenceOnce(_pacmanPosition, isFlipped))

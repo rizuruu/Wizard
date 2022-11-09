@@ -63,6 +63,7 @@ private:
 
 	AnimationSequence* IdleAnimator;
 	AnimationSequence* RunAnimator;
+	AnimationSequence* JumpAnimator;
 	AnimationSequence* AttackAnimator;
 	AnimationSequence* FlowerAnimator;
 
@@ -90,6 +91,7 @@ public:
 	{
 		Idle,
 		Running,
+		Jumping,
 		Attacking,
 	};
 	

@@ -36,7 +36,7 @@ public:
 	/// </summary>
 	/// <param name="pos"></param>
 	/// <param name="isFlipped"></param>
-	void virtual PlaySequence(Vector2* pos, bool isFlipped);
+	void virtual PlaySequence(Vector2* pos, bool isFlipped, float scale = 1.0f);
 
 	/// <summary>
 	/// Plays complete sequence for single input press and returns a bool
