@@ -28,6 +28,8 @@ private:
 	Texture2D* _pacmanTexture;
 	Texture2D* _RunTexture;
 	Texture2D* _AttackTexture;
+	Texture2D* Platform;
+	Texture2D* Flower;
 	Rect* PlayerIdleFrames[24];
 	Rect* PlayerRunFrames[22];
 	Rect* PlayerAttackFrames[21];
@@ -47,6 +49,7 @@ private:
 	Vector2* _menuStringPosition; 
 	bool _paused;
 	bool _pKeyDown;
+	bool isFlipped;
 
 	int _pacmanFrame;
 	int _pacmanCurrentFrameTime;
@@ -55,11 +58,13 @@ private:
 	Vector2* IdleFramesVector;
 	Vector2 RunFramesVector;
 	Vector2* AttackFramesVector;
+	Vector2* FlowerFramesVector;
 	int CurrentFrame;
 
 	AnimationSequence* IdleAnimator;
 	AnimationSequence* RunAnimator;
 	AnimationSequence* AttackAnimator;
+	AnimationSequence* FlowerAnimator;
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>
@@ -79,7 +84,6 @@ public:
 
 	void virtual DrawPlayerAnimation(int elapsedTime);
 	void virtual InputHandler(int elapsedTime);
-
 	const float _cPacmanSpeed = 0.1f;
 
 	enum class PlayerState

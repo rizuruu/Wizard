@@ -16,8 +16,12 @@ private:
 	Vector2* v_FramesCount;
 	int FramesCount;
 	Rect* AnimationFrames[100];
+	vector<Rect> AnimFrames;
 public:
 	AnimationSequence();
-	void virtual PlaySequence(Vector2* pos);
 	void virtual Initialize(Texture2D* Source, int FramesCount, Vector2* grid);
+	void virtual Initialize(Texture2D* Source, int FramesCount, Vector2* grid, int w);
+
+	void virtual PlaySequence(Vector2* pos, bool isFlipped);
+	bool virtual PlaySequenceOnce(Vector2* pos, bool isFlipped);
 };
