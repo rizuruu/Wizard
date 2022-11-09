@@ -6,9 +6,9 @@ using namespace S2D;
 class Sequence
 {
 public:
-	Vector2 GridVector;
+	Texture2D* Source;
 	int FramesCount;
-	Texture2D SourceTexture;
-	Rect* SourceRect;
-	Vector2* Position;
+	Vector2* grid;
+	int width;
+	int height;
 };

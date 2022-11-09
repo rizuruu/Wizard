@@ -7,7 +7,7 @@ AnimationSequence::AnimationSequence()
 
 }
 
-void AnimationSequence::Initialize(Texture2D* Source, int Frames, Vector2* grid)
+void AnimationSequence::Initialize(Texture2D* Source, int Frames, Vector2* grid, int width, int height)
 {
 	SourceTexture = Source;
 	FramesCount = Frames;
@@ -17,24 +17,22 @@ void AnimationSequence::Initialize(Texture2D* Source, int Frames, Vector2* grid)
 	{
 		for (int j = 0; j < v_FramesCount->X; j++)
 		{
-			AnimFrames.push_back(Rect(512.0f * j, 512.0f * i, 512, 512));
-			//AnimationFrames[t] = new S2D::Rect(847.0f * j, 864.0f * i, 847, 864);
+			AnimFrames.push_back(Rect(width * j, height * i, width, height));
 		}
 	}
 }
 
-void AnimationSequence::Initialize(Texture2D* Source, int Frames, Vector2* grid, int w)
+void AnimationSequence::Initialize(Sequence sequence)
 {
-	SourceTexture = Source;
-	FramesCount = Frames;
-	v_FramesCount = grid;
+	SourceTexture = sequence.Source;
+	FramesCount = sequence.FramesCount;
+	v_FramesCount = sequence.grid;
 
 	for (int i = 0; i < v_FramesCount->Y; i++)
 	{
 		for (int j = 0; j < v_FramesCount->X; j++)
 		{
-			AnimFrames.push_back(Rect(w * j, w * i, w, w));
-			//AnimationFrames[t] = new S2D::Rect(847.0f * j, 864.0f * i, 847, 864);
+			AnimFrames.push_back(Rect(sequence.width * j, sequence.height * i, sequence.width, sequence.height));
 		}
 	}
 }

@@ -19,8 +19,17 @@ private:
 	vector<Rect> AnimFrames;
 public:
 	AnimationSequence();
-	void virtual Initialize(Texture2D* Source, int FramesCount, Vector2* grid);
-	void virtual Initialize(Texture2D* Source, int FramesCount, Vector2* grid, int w);
+
+	/// <summary>
+	/// Initilize a single sprite sheet to vector/array of rects to animate. Takes all data as arguments
+	/// </summary>
+	/// <param name="Source">Texture2D Source of sprite sheet</param>
+	/// <param name="FramesCount">Count of Frames of animation</param>
+	/// <param name="grid">Grid vector of sprite sheet</param>
+	/// <param name="width">Width of individual frame</param>
+	/// <param name="height">Height of Individual Frame</param>
+	void virtual Initialize(Texture2D* Source, int FramesCount, Vector2* grid, int width, int height);
+	void virtual Initialize(Sequence sequence);
 
 	void virtual PlaySequence(Vector2* pos, bool isFlipped);
 	bool virtual PlaySequenceOnce(Vector2* pos, bool isFlipped);

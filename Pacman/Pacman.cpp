@@ -26,7 +26,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	// Get the size of screen to the variable desktop
 	GetWindowRect(hDesktop, &desktop);
 	//Initialise important Game aspects
-	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, false, 25, 25, "Pacman", 60);
+	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, true, 25, 25, "Pacman", 60);
 	Input::Initialise();
 	// Start the Game Loop - This calls Update and Draw in game loop
 	Graphics::StartGameLoop();
@@ -63,13 +63,20 @@ void Pacman::LoadContent()
 	Flower->Load("Textures/f.png", false);
 	_RunTexture->Load("Textures/PlayerWalk.png", false);
 	_AttackTexture->Load("Textures/Ghost2_Attack.png", false);
-	_pacmanPosition = new Vector2(-128.0f, (Graphics::GetViewportHeight()/2));
+	_pacmanPosition = new Vector2(-128.0f, (Graphics::GetViewportHeight()/2 + 64));
 	int t = 0;
 
-	IdleAnimator->Initialize(_pacmanTexture, 20, IdleFramesVector);
-	RunAnimator->Initialize(_RunTexture, 20, IdleFramesVector);
-	AttackAnimator->Initialize(_AttackTexture, 14, AttackFramesVector);
-	FlowerAnimator->Initialize(Flower, 60, FlowerFramesVector, 768);
+	RunAnimator->Initialize(_RunTexture, 20, IdleFramesVector, 512, 512);
+	AttackAnimator->Initialize(_AttackTexture, 14, AttackFramesVector, 512, 512);
+	Sequence sequence;
+	sequence.FramesCount = 20;
+	sequence.grid = IdleFramesVector;
+	sequence.Source = _pacmanTexture;
+	sequence.width = 512;
+	sequence.height = 512;
+	IdleAnimator->Initialize(sequence);
+
+	//FlowerAnimator->Initialize(Flower, 60, FlowerFramesVector, 768, 768);
 
 	_pacmanSourceRect = new Rect(0.0f, 0.0f, 847, 864);
 
@@ -117,7 +124,7 @@ void Pacman::Draw(int elapsedTime)
 	if (!_paused)
 		DrawPlayerAnimation(elapsedTime);
 
-	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight()/6), false);
+	//FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight()/6), false);
 
 	SpriteBatch::Draw(Platform, new Vector2(-20, Graphics::GetViewportHeight() - 124), new Rect(0, 1550, 2048, 498), Vector2::Zero, 0.5f, 0.0f, Color::White, SpriteEffect::NONE);
 	SpriteBatch::Draw(Platform, new Vector2(900, Graphics::GetViewportHeight() - 124), new Rect(0, 1550, 2048, 498), Vector2::Zero, 0.5f, 0.0f, Color::White, SpriteEffect::NONE);
