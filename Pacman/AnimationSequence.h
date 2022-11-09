@@ -31,6 +31,18 @@ public:
 	void virtual Initialize(Texture2D* Source, int FramesCount, Vector2* grid, int width, int height);
 	void virtual Initialize(Sequence sequence);
 
+	/// <summary>
+	/// Plays complete sequence as long as input is held
+	/// </summary>
+	/// <param name="pos"></param>
+	/// <param name="isFlipped"></param>
 	void virtual PlaySequence(Vector2* pos, bool isFlipped);
+
+	/// <summary>
+	/// Plays complete sequence for single input press and returns a bool
+	/// </summary>
+	/// <param name="pos"></param>
+	/// <param name="isFlipped"></param>
+	/// <returns></returns>
 	bool virtual PlaySequenceOnce(Vector2* pos, bool isFlipped);
 };
