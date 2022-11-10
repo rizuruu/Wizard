@@ -85,12 +85,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AnimationSequence.cpp" />
+    <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pacman.cpp" />
     <ClCompile Include="Sequence.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimationSequence.h" />
+    <ClInclude Include="Collision.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="Pacman.h" />
     <ClInclude Include="Sequence.h" />
   </ItemGroup>
