@@ -67,6 +67,8 @@ private:
 	AnimationSequence* AttackAnimator;
 	AnimationSequence* FlowerAnimator;
 
+	SoundEffect* music;
+
 public:
 	/// <summary> Constructs the Pacman class. </summary>
 	Pacman(int argc, char* argv[]);

@@ -26,8 +26,10 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	// Get the size of screen to the variable desktop
 	GetWindowRect(hDesktop, &desktop);
 	//Initialise important Game aspects
+	S2D::Audio::Initialise();
 	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, true, 25, 25, "Pacman", 60);
 	Input::Initialise();
+
 	// Start the Game Loop - This calls Update and Draw in game loop
 	Graphics::StartGameLoop();
 }
@@ -46,12 +48,14 @@ void Pacman::LoadContent()
 	using namespace std::this_thread;     // sleep_for, sleep_until
 	using namespace std::chrono_literals; // ns, us, ms, s, h, etc.
 	using std::chrono::system_clock;
-
+	music = new SoundEffect();
+	music->Load("Audio/BG_Music.wav");
+	music->SetLooping(true);
+	music->SetGain(0.2f);
 	IdleAnimator = new AnimationSequence();
 	RunAnimator = new AnimationSequence();
 	AttackAnimator = new AnimationSequence();
 	FlowerAnimator = new AnimationSequence();
-
 	// Load Pacman
 	_pacmanTexture = new Texture2D();
 	_RunTexture = new Texture2D();
@@ -98,6 +102,7 @@ void Pacman::LoadContent()
 	_menuRectangle = new Rect(0.0f, 0.0f, Graphics::GetViewportWidth(), Graphics::GetViewportHeight());
 
 	_menuStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
+	Audio::Play(music);
 }
 
 void Pacman::Update(int elapsedTime)
@@ -112,7 +117,9 @@ void Pacman::Draw(int elapsedTime)
 	stream << "Pacman X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y << " frame: " << time;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
-	SpriteBatch::DrawRectangle(new Rect(0, 0, 1920, 1080), new Color(0.0f, 0.341f, 0.416f, 1.0f));
+	SpriteBatch::DrawRectangle(new Rect(0, 0, 1920, 1080), new Color(0.0f, 0.341f, 0.416f, 0.5f));
+	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() - 256), false, 0.3f);
+
 	if (_paused)
 
 	{
@@ -124,7 +131,6 @@ void Pacman::Draw(int elapsedTime)
 	if (!_paused)
 		DrawPlayerAnimation(elapsedTime);
 
-	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() - 256), false, 0.3f);
 
 	SpriteBatch::Draw(Platform, new Vector2(-20, Graphics::GetViewportHeight() - 124), new Rect(0, 1550, 2048, 498), Vector2::Zero, 0.5f, 0.0f, Color::White, SpriteEffect::NONE);
 	SpriteBatch::Draw(Platform, new Vector2(900, Graphics::GetViewportHeight() - 124), new Rect(0, 1550, 2048, 498), Vector2::Zero, 0.5f, 0.0f, Color::White, SpriteEffect::NONE);

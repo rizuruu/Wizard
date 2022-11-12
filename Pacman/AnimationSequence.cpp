@@ -39,10 +39,10 @@ void AnimationSequence::Initialize(Sequence sequence)
 
 void AnimationSequence::PlaySequence(Vector2* pos, bool isFlipped, float scale)
 {
-	std::stringstream stream;
-	stream << "frame: " << CurrentFrame;
+	//std::stringstream stream;
+	//stream << "frame: " << CurrentFrame;
 
-	SpriteBatch::DrawString(stream.str().c_str(), pos, Color::Green);
+	//SpriteBatch::DrawString(stream.str().c_str(), pos, Color::Green);
 
 	if (CurrentFrame < FramesCount)
 	{
