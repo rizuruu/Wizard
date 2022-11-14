@@ -56,19 +56,19 @@ void AnimationSequence::PlaySequence(Vector2* pos, bool isFlipped, float scale)
 	}
 }
 
-bool AnimationSequence::PlaySequenceOnce(Vector2* pos, bool isFlipped)
+bool AnimationSequence::PlaySequenceOnce(Vector2* pos, bool isFlipped, float scale)
 {
 	CurrentFrame++;
 
 	if (CurrentFrame < FramesCount)
 	{
-		SpriteBatch::Draw(SourceTexture, pos, new Rect(AnimFrames.at(CurrentFrame)), Vector2::Zero, 0.5f, 0.0f, Color::White, isFlipped ? SpriteEffect::FLIPHORIZONTAL : SpriteEffect::NONE);
+		SpriteBatch::Draw(SourceTexture, pos, new Rect(AnimFrames.at(CurrentFrame)), Vector2::Zero, scale, 0.0f, Color::White, isFlipped ? SpriteEffect::FLIPHORIZONTAL : SpriteEffect::NONE);
 		return false;
 	}
 	else
 	{
 		CurrentFrame = 0;
-		SpriteBatch::Draw(SourceTexture, pos, new Rect(AnimFrames.at(0)), Vector2::Zero, 0.5f, 0.0f, Color::White, isFlipped ? SpriteEffect::FLIPHORIZONTAL : SpriteEffect::NONE);
+		SpriteBatch::Draw(SourceTexture, pos, new Rect(AnimFrames.at(0)), Vector2::Zero, scale, 0.0f, Color::White, isFlipped ? SpriteEffect::FLIPHORIZONTAL : SpriteEffect::NONE);
 		return true;
 	}
 }

@@ -17,9 +17,11 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	_pacmanCurrentFrameTime = 0;
 	_pacmanFrame = 0;
 	IdleFramesVector = new S2D::Vector2(20, 1);
+	JumpFramesVector = new S2D::Vector2(3, 2);
 	AttackFramesVector = new S2D::Vector2(5, 5);
 	FlowerFramesVector = new S2D::Vector2(10, 6);
 	CurrentFrame = 0;
+	Acc = 0;
 	RECT desktop;
 	// Get a handle to the desktop window
 	const HWND hDesktop = GetDesktopWindow();
@@ -54,11 +56,13 @@ void Pacman::LoadContent()
 	music->SetGain(0.2f);
 	IdleAnimator = new AnimationSequence();
 	RunAnimator = new AnimationSequence();
+	JumpAnimator = new AnimationSequence();
 	AttackAnimator = new AnimationSequence();
 	FlowerAnimator = new AnimationSequence();
 	// Load Pacman
 	_pacmanTexture = new Texture2D();
 	_RunTexture = new Texture2D();
+	_JumpTexture = new Texture2D();
 	_AttackTexture = new Texture2D();
 	Platform = new Texture2D();
 	Flower = new Texture2D();
@@ -66,12 +70,15 @@ void Pacman::LoadContent()
 	Platform->Load("Textures/Platform.png", false);
 	Flower->Load("Textures/Flower.png", false);
 	_RunTexture->Load("Textures/PlayerWalk.png", false);
+	_JumpTexture->Load("Textures/Jump.png", false);
 	_AttackTexture->Load("Textures/Ghost2_Attack.png", false);
 	_pacmanPosition = new Vector2(-128.0f, (Graphics::GetViewportHeight()/2 + 64));
+	_JumpPosition = new Vector2(_pacmanPosition->X, _pacmanPosition->Y - 80);
 	int t = 0;
 
 	RunAnimator->Initialize(_RunTexture, 20, IdleFramesVector, 512, 512);
 	AttackAnimator->Initialize(_AttackTexture, 14, AttackFramesVector, 512, 512);
+	JumpAnimator->Initialize(_JumpTexture, 6, JumpFramesVector, 512, 512);
 	Sequence sequence;
 	sequence.FramesCount = 20;
 	sequence.grid = IdleFramesVector;
@@ -102,7 +109,7 @@ void Pacman::LoadContent()
 	_menuRectangle = new Rect(0.0f, 0.0f, Graphics::GetViewportWidth(), Graphics::GetViewportHeight());
 
 	_menuStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
-	Audio::Play(music);
+	//Audio::Play(music);
 }
 
 void Pacman::Update(int elapsedTime)
@@ -142,6 +149,8 @@ void Pacman::Draw(int elapsedTime)
 void Pacman::InputHandler(int elapsedTime)
 {
 	if (PState == PlayerState::Attacking)
+		return;
+	else if (PState == PlayerState::Jumping)
 		return;
 
 	// Gets the current state of the keyboard
@@ -213,11 +222,32 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 			RunAnimator->PlaySequence(_pacmanPosition, isFlipped);
 			break;
 		case PlayerState::Jumping:
-			//JumpAnimator->PlaySequenceOnce()
+			if (JumpAnimator->PlaySequenceOnce(_pacmanPosition, isFlipped))
+				PState = PlayerState::Idle;
+			if (Jump(elapsedTime))
+				PState = PlayerState::Idle;
 			break;
 		case PlayerState::Attacking:
 			if (AttackAnimator->PlaySequenceOnce(_pacmanPosition, isFlipped))
 				PState = PlayerState::Idle;
 			break;
+	}
+}
+
+bool Pacman::Jump(int elapsedTime)
+{
+	if (Acc <= 30)
+	{
+		Acc += _cPacmanSpeed * elapsedTime;
+		_pacmanPosition->Y -= Acc;
+		return false;
+	}
+	else
+	{
+		int ac = Acc;
+		ac -= _cPacmanSpeed * elapsedTime;
+			_pacmanPosition->Y += ac;
+			if (ac <= 0)
+				Acc = 0;
 	}
 }

@@ -24,9 +24,11 @@ class Pacman : public Game
 private:
 	// Data to represent Pacman
 	Vector2* _pacmanPosition;
+	Vector2* _JumpPosition;
 	Rect* _pacmanSourceRect;
 	Texture2D* _pacmanTexture;
 	Texture2D* _RunTexture;
+	Texture2D* _JumpTexture;
 	Texture2D* _AttackTexture;
 	Texture2D* Platform;
 	Texture2D* Flower;
@@ -57,9 +59,11 @@ private:
 
 	Vector2* IdleFramesVector;
 	Vector2 RunFramesVector;
+	Vector2* JumpFramesVector;
 	Vector2* AttackFramesVector;
 	Vector2* FlowerFramesVector;
 	int CurrentFrame;
+	int Acc;
 
 	AnimationSequence* IdleAnimator;
 	AnimationSequence* RunAnimator;
@@ -88,6 +92,7 @@ public:
 	void virtual DrawPlayerAnimation(int elapsedTime);
 	void virtual InputHandler(int elapsedTime);
 	const float _cPacmanSpeed = 0.1f;
+	bool virtual Jump(int elapsedTime);
 
 	enum class PlayerState
 	{

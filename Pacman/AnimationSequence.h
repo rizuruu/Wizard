@@ -44,5 +44,5 @@ public:
 	/// <param name="pos"></param>
 	/// <param name="isFlipped"></param>
 	/// <returns></returns>
-	bool virtual PlaySequenceOnce(Vector2* pos, bool isFlipped);
+	bool virtual PlaySequenceOnce(Vector2* pos, bool isFlipped, float scale = 1.0f);
 };
