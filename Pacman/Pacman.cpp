@@ -12,6 +12,7 @@ using namespace std;
 
 Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), _cPacmanFrameTime(250)
 {
+	hasJumped = false;
 	_frameCount = 0;
 	_paused = false;
 	_pKeyDown = false;
@@ -48,13 +49,8 @@ Pacman::~Pacman()
 
 void Pacman::LoadContent()
 {
-	using namespace std::this_thread;     // sleep_for, sleep_until
-	using namespace std::chrono_literals; // ns, us, ms, s, h, etc.
-	using std::chrono::system_clock;
-	music = new SoundEffect();
+	music = new SoundEffect(true, 1.0f, 0.2f);
 	music->Load("Audio/BG_Music.wav");
-	music->SetLooping(true);
-	music->SetGain(0.2f);
 	IdleAnimator = new AnimationSequence();
 	RunAnimator = new AnimationSequence();
 	JumpAnimator = new AnimationSequence();
@@ -73,22 +69,11 @@ void Pacman::LoadContent()
 	_RunTexture->Load("Textures/PlayerWalk.png", false);
 	_JumpTexture->Load("Textures/Jump.png", false);
 	_AttackTexture->Load("Textures/Ghost2_Attack.png", false);
-	_pacmanPosition = new Vector2(-128.0f, (Graphics::GetViewportHeight()/2 + 64));
+	_pacmanPosition = new Vector2(-128.0f, (Graphics::GetViewportHeight()/2) - 16);
 	_JumpPosition = new Vector2(_pacmanPosition->X, _pacmanPosition->Y - 80);
 	int t = 0;
 
-	RunAnimator->Initialize(_RunTexture, 20, IdleFramesVector, 512, 512);
-	AttackAnimator->Initialize(_AttackTexture, 14, AttackFramesVector, 512, 512);
-	JumpAnimator->Initialize(_JumpTexture, 6, JumpFramesVector, 512, 512);
-	Sequence sequence;
-	sequence.FramesCount = 20;
-	sequence.grid = IdleFramesVector;
-	sequence.Source = _pacmanTexture;
-	sequence.width = 512;
-	sequence.height = 512;
-	IdleAnimator->Initialize(sequence);
-
-	FlowerAnimator->Initialize(Flower, 60, FlowerFramesVector, 768, 768);
+	InitializeSequences();
 
 	_pacmanSourceRect = new Rect(0.0f, 0.0f, 847, 864);
 
@@ -113,6 +98,23 @@ void Pacman::LoadContent()
 	//Audio::Play(music);
 }
 
+void Pacman::InitializeSequences()
+{
+	Sequence sequence;
+	sequence.FramesCount = 20;
+	sequence.grid = IdleFramesVector;
+	sequence.Source = _pacmanTexture;
+	sequence.width = 512;
+	sequence.height = 512;
+	IdleAnimator->Initialize(sequence);
+
+	RunAnimator->Initialize(_RunTexture, 20, IdleFramesVector, 512, 512);
+	AttackAnimator->Initialize(_AttackTexture, 14, AttackFramesVector, 512, 512);
+	JumpAnimator->Initialize(_JumpTexture, 6, JumpFramesVector, 512, 512);
+
+	FlowerAnimator->Initialize(Flower, 60, FlowerFramesVector, 768, 768);
+}
+
 void Pacman::Update(int elapsedTime)
 {
 	InputHandler(elapsedTime);
@@ -120,13 +122,16 @@ void Pacman::Update(int elapsedTime)
 
 void Pacman::Draw(int elapsedTime)
 {
+	//_pacmanPosition->Y = (Graphics::GetViewportHeight() / 2 + 16);
+
 	// Allows us to easily create a string
 	std::stringstream stream;
-	stream << "Pacman X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y << " frame: " << time;
+	stream << "Player X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
-	SpriteBatch::DrawRectangle(new Rect(0, 0, 1920, 1080), new Color(0.0f, 0.341f, 0.416f, 0.5f));
 	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() - 256), false, 0.3f);
+
+	SpriteBatch::DrawRectangle(new Rect(0, 0, 1920, 1080), new Color(0.0f, 0.341f, 0.416f, 0.5f));
 
 	if (_paused)
 
@@ -135,10 +140,10 @@ void Pacman::Draw(int elapsedTime)
 		_menuStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
 		SpriteBatch::Draw(_menuBackground, _menuRectangle, nullptr); SpriteBatch::DrawString(menuStream.str().c_str(), _menuStringPosition, Color::Red);
 	}
-
-	if (!_paused)
+	else
+	{
 		DrawPlayerAnimation(elapsedTime);
-
+	}
 
 	SpriteBatch::Draw(Platform, new Vector2(-20, Graphics::GetViewportHeight() - 124), new Rect(0, 1550, 2048, 498), Vector2::Zero, 0.5f, 0.0f, Color::White, SpriteEffect::NONE);
 	SpriteBatch::Draw(Platform, new Vector2(900, Graphics::GetViewportHeight() - 124), new Rect(0, 1550, 2048, 498), Vector2::Zero, 0.5f, 0.0f, Color::White, SpriteEffect::NONE);
@@ -186,8 +191,8 @@ void Pacman::InputHandler(int elapsedTime)
 		{
 			PState = PlayerState::Jumping;
 		}
-		else if (mouseState->LeftButton == Input::ButtonState::PRESSED)
-			PState = PlayerState::Attacking;
+		//else if (mouseState->LeftButton == Input::ButtonState::PRESSED)
+		//	PState = PlayerState::Attacking;
 		else
 		{
 			PState = PlayerState::Idle;
@@ -236,23 +241,37 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 
 bool Pacman::Jump(int elapsedTime)
 {
-	if (Acc >= 0 && Acc < 45)
+	std::cout << "Outisde" << Acc << endl;
+
+	if (Acc >= 0 && !hasJumped)
 	{
 		//while (_pacmanPosition->Y >= 496)
 		//{
-		Acc += _cPacmanSpeed * elapsedTime;
-			_pacmanPosition->Y -= Acc;
-			std::cout << Acc << endl;
-			//return false;
-		//}
+		Acc += 0.2f * elapsedTime;
+		_pacmanPosition->Y -= Acc;
+		std::cout << Acc << endl;
+		if (Acc >= 50)
+		{ 
+			Acc = 0;
+			hasJumped = true;
+		} 
 		return false;
 	}
-	else if (Acc <= 45)
+	else if (hasJumped)
 	{
+		if (Acc <= 50)
+		{
 			Acc += _cPacmanSpeed * elapsedTime;
-			_pacmanPosition->Y -= Acc;
-		std::cout << Acc << endl;
+			_pacmanPosition->Y += Acc;
+			std::cout << Acc << endl;
+			return false;
 
-		//else return true;
+		}
+		else
+		{
+			hasJumped = false;
+			Acc = 0;
+			return true;
+		}
 	}
 }

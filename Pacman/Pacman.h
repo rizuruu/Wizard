@@ -52,6 +52,7 @@ private:
 	bool _paused;
 	bool _pKeyDown;
 	bool isFlipped;
+	bool hasJumped;
 
 	int _pacmanFrame;
 	int _pacmanCurrentFrameTime;
@@ -72,6 +73,7 @@ private:
 	AnimationSequence* FlowerAnimator;
 
 	SoundEffect* music;
+	const float _cPacmanSpeed = 0.1f;
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>
@@ -83,6 +85,9 @@ public:
 	/// <summary> All content should be loaded in this method. </summary>
 	void virtual LoadContent();
 
+
+	void virtual InitializeSequences();
+
 	/// <summary> Called every frame - update game logic here. </summary>
 	void virtual Update(int elapsedTime);
 
@@ -91,7 +96,6 @@ public:
 
 	void virtual DrawPlayerAnimation(int elapsedTime);
 	void virtual InputHandler(int elapsedTime);
-	const float _cPacmanSpeed = 0.1f;
 	bool virtual Jump(int elapsedTime);
 
 	enum class PlayerState
