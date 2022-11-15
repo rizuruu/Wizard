@@ -6,6 +6,7 @@
 #include <sstream>
 #include "wtypes.h"
 #include <windows.h>
+#include <iostream>
 
 using namespace std;
 
@@ -29,7 +30,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	GetWindowRect(hDesktop, &desktop);
 	//Initialise important Game aspects
 	S2D::Audio::Initialise();
-	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, true, 25, 25, "Pacman", 60);
+	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, false, 25, 25, "Pacman", 60);
 	Input::Initialise();
 
 	// Start the Game Loop - This calls Update and Draw in game loop
@@ -150,7 +151,7 @@ void Pacman::InputHandler(int elapsedTime)
 {
 	if (PState == PlayerState::Attacking)
 		return;
-	else if (PState == PlayerState::Jumping)
+	if (PState == PlayerState::Jumping)
 		return;
 
 	// Gets the current state of the keyboard
@@ -222,8 +223,7 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 			RunAnimator->PlaySequence(_pacmanPosition, isFlipped);
 			break;
 		case PlayerState::Jumping:
-			if (JumpAnimator->PlaySequenceOnce(_pacmanPosition, isFlipped))
-				PState = PlayerState::Idle;
+			JumpAnimator->PlaySequence(_pacmanPosition, isFlipped);
 			if (Jump(elapsedTime))
 				PState = PlayerState::Idle;
 			break;
@@ -236,18 +236,23 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 
 bool Pacman::Jump(int elapsedTime)
 {
-	if (Acc <= 30)
+	if (Acc >= 0 && Acc < 45)
 	{
+		//while (_pacmanPosition->Y >= 496)
+		//{
 		Acc += _cPacmanSpeed * elapsedTime;
-		_pacmanPosition->Y -= Acc;
+			_pacmanPosition->Y -= Acc;
+			std::cout << Acc << endl;
+			//return false;
+		//}
 		return false;
 	}
-	else
+	else if (Acc <= 45)
 	{
-		int ac = Acc;
-		ac -= _cPacmanSpeed * elapsedTime;
-			_pacmanPosition->Y += ac;
-			if (ac <= 0)
-				Acc = 0;
+			Acc += _cPacmanSpeed * elapsedTime;
+			_pacmanPosition->Y -= Acc;
+		std::cout << Acc << endl;
+
+		//else return true;
 	}
 }
