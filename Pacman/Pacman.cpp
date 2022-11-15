@@ -154,8 +154,6 @@ void Pacman::Draw(int elapsedTime)
 
 void Pacman::InputHandler(int elapsedTime)
 {
-	if (PState == PlayerState::Attacking)
-		return;
 	if (PState == PlayerState::Jumping)
 		return;
 
@@ -241,15 +239,11 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 
 bool Pacman::Jump(int elapsedTime)
 {
-	std::cout << "Outisde" << Acc << endl;
 
 	if (Acc >= 0 && !hasJumped)
 	{
-		//while (_pacmanPosition->Y >= 496)
-		//{
 		Acc += 0.2f * elapsedTime;
 		_pacmanPosition->Y -= Acc;
-		std::cout << Acc << endl;
 		if (Acc >= 50)
 		{ 
 			Acc = 0;
@@ -263,7 +257,6 @@ bool Pacman::Jump(int elapsedTime)
 		{
 			Acc += _cPacmanSpeed * elapsedTime;
 			_pacmanPosition->Y += Acc;
-			std::cout << Acc << endl;
 			return false;
 
 		}

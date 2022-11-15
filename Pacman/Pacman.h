@@ -85,7 +85,6 @@ public:
 	/// <summary> All content should be loaded in this method. </summary>
 	void virtual LoadContent();
 
-
 	void virtual InitializeSequences();
 
 	/// <summary> Called every frame - update game logic here. </summary>
