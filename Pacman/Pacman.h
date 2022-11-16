@@ -32,9 +32,11 @@ private:
 	Texture2D* _AttackTexture;
 	Texture2D* Platform;
 	Texture2D* Flower;
+	Texture2D* Tile;
 	Rect* PlayerIdleFrames[24];
 	Rect* PlayerRunFrames[22];
 	Rect* PlayerAttackFrames[21];
+	Rect* Tile_Rect;
 	
 	// Data to represent Munchie
 	int _frameCount;

@@ -63,19 +63,22 @@ void Pacman::LoadContent()
 	_AttackTexture = new Texture2D();
 	Platform = new Texture2D();
 	Flower = new Texture2D();
+	Tile = new Texture2D();
 	_pacmanTexture->Load("Textures/PlayerIdle.png", false);
 	Platform->Load("Textures/Platform.png", false);
 	Flower->Load("Textures/Flower.png", false);
 	_RunTexture->Load("Textures/PlayerWalk.png", false);
 	_JumpTexture->Load("Textures/Jump.png", false);
 	_AttackTexture->Load("Textures/Ghost2_Attack.png", false);
-	_pacmanPosition = new Vector2(-128.0f, (Graphics::GetViewportHeight()/2) - 16);
+	Tile->Load("Textures/TileSet.png", false);
+	_pacmanPosition = new Vector2(-128.0f, Graphics::GetViewportHeight() - 512);
 	_JumpPosition = new Vector2(_pacmanPosition->X, _pacmanPosition->Y - 80);
 	int t = 0;
 
 	InitializeSequences();
 
 	_pacmanSourceRect = new Rect(0.0f, 0.0f, 847, 864);
+	Tile_Rect = new Rect(512.0f, 0.0f, 512, 512);
 
 	// Load Munchie
 	_munchieBlueTexture = new Texture2D();
@@ -129,7 +132,7 @@ void Pacman::Draw(int elapsedTime)
 	stream << "Player X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
-	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() - 256), false, 0.3f);
+	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() - 200), false, 0.3f);
 
 	SpriteBatch::DrawRectangle(new Rect(0, 0, 1920, 1080), new Color(0.0f, 0.341f, 0.416f, 0.5f));
 
@@ -145,8 +148,10 @@ void Pacman::Draw(int elapsedTime)
 		DrawPlayerAnimation(elapsedTime);
 	}
 
-	SpriteBatch::Draw(Platform, new Vector2(-20, Graphics::GetViewportHeight() - 124), new Rect(0, 1550, 2048, 498), Vector2::Zero, 0.5f, 0.0f, Color::White, SpriteEffect::NONE);
-	SpriteBatch::Draw(Platform, new Vector2(900, Graphics::GetViewportHeight() - 124), new Rect(0, 1550, 2048, 498), Vector2::Zero, 0.5f, 0.0f, Color::White, SpriteEffect::NONE);
+	for (int i = 0; i < 26; i++)
+	{
+		SpriteBatch::Draw(Tile, new Vector2(73*i, Graphics::GetViewportHeight() - 73), Tile_Rect, Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	}
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
 	SpriteBatch::EndDraw(); // Ends Drawing
