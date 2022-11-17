@@ -79,6 +79,7 @@ void Pacman::LoadContent()
 
 	_pacmanSourceRect = new Rect(0.0f, 0.0f, 847, 864);
 	Tile_Rect = new Rect(512.0f, 0.0f, 512, 512);
+	Tile_Rect2 = new Rect(512.0f, 1024.0f, 512, 512);
 
 	// Load Munchie
 	_munchieBlueTexture = new Texture2D();
@@ -148,10 +149,21 @@ void Pacman::Draw(int elapsedTime)
 		DrawPlayerAnimation(elapsedTime);
 	}
 
+	for (int i = 1; i < 26; i++)
+	{
+		SpriteBatch::Draw(Tile, new Vector2(Graphics::GetViewportWidth() - (i*73), Graphics::GetViewportHeight() - 140), new Rect(0.0f, 0.0f, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	}
+
 	for (int i = 0; i < 26; i++)
 	{
-		SpriteBatch::Draw(Tile, new Vector2(73*i, Graphics::GetViewportHeight() - 73), Tile_Rect, Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+		SpriteBatch::Draw(Tile, new Vector2(0 + i * 73, Graphics::GetViewportHeight() - 73), Tile_Rect, Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	}
+
+	for (int i = 0; i < 26; i++)
+	{
+		SpriteBatch::Draw(Tile, new Vector2(73 * i, -73), Tile_Rect2, Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	}
+
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
 	SpriteBatch::EndDraw(); // Ends Drawing

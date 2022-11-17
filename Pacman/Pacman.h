@@ -37,6 +37,7 @@ private:
 	Rect* PlayerRunFrames[22];
 	Rect* PlayerAttackFrames[21];
 	Rect* Tile_Rect;
+	Rect* Tile_Rect2;
 	
 	// Data to represent Munchie
 	int _frameCount;
