@@ -134,6 +134,11 @@ void Pacman::Draw(int elapsedTime)
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
 	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() - 200), false, 0.3f);
+	for (int i = 0; i < 3; i++)
+	{
+		SpriteBatch::Draw(Tile, new Vector2(73*i, Graphics::GetViewportHeight() - 300), new Rect(0.0f, 0.0f, 510, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::FLIPHORIZONTAL);
+	}
+	SpriteBatch::Draw(Tile, new Vector2(73*2, Graphics::GetViewportHeight() - 200), new Rect(1024.0f, 512.0f, 510, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 
 	SpriteBatch::DrawRectangle(new Rect(0, 0, 1920, 1080), new Color(0.0f, 0.341f, 0.416f, 0.5f));
 
@@ -149,10 +154,11 @@ void Pacman::Draw(int elapsedTime)
 		DrawPlayerAnimation(elapsedTime);
 	}
 
-	for (int i = 1; i < 26; i++)
+	for (int i = 1; i < 6; i++)
 	{
-		SpriteBatch::Draw(Tile, new Vector2(Graphics::GetViewportWidth() - (i*73), Graphics::GetViewportHeight() - 140), new Rect(0.0f, 0.0f, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+		SpriteBatch::Draw(Tile, new Vector2(Graphics::GetViewportWidth() - (i*73), Graphics::GetViewportHeight() - 200), new Rect(0.0f, 0.0f, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	}
+
 
 	for (int i = 0; i < 26; i++)
 	{
