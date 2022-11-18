@@ -9,6 +9,8 @@ public:
 	int Radius;
 	int Width;
 	int Height;
+	float X;
+	float Y;
 
 	//bool virtual IsColliding(GameObject gameObjectA, GameObject gameObjectB);
 

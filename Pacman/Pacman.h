@@ -33,6 +33,8 @@ private:
 	Texture2D* Platform;
 	Texture2D* Flower;
 	Texture2D* Tile;
+	Texture2D* VegetationA;
+	Texture2D* WindPlant;
 	Rect* PlayerIdleFrames[24];
 	Rect* PlayerRunFrames[22];
 	Rect* PlayerAttackFrames[21];
@@ -74,6 +76,7 @@ private:
 	AnimationSequence* JumpAnimator;
 	AnimationSequence* AttackAnimator;
 	AnimationSequence* FlowerAnimator;
+	AnimationSequence* WindPlantAnimator;
 
 	SoundEffect* music;
 	const float _cPacmanSpeed = 0.1f;
@@ -99,6 +102,9 @@ public:
 	void virtual DrawPlayerAnimation(int elapsedTime);
 	void virtual InputHandler(int elapsedTime);
 	bool virtual Jump(int elapsedTime);
+	int random(int min, int max);
+
+	bool virtual IsColliding();
 
 	enum class PlayerState
 	{
