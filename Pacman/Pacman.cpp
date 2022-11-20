@@ -48,6 +48,10 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	gameObjectC->Rect->X = 1600;
 	gameObjectC->Rect->Y = 900;
 
+	PlatformCollider = new Collision(Collision::CollisionType::Static);
+	PlatformCollider->Rect->Height = 73 * 2;
+	PlatformCollider->Rect->Width = 73 * 4;
+
 	CurrentFrame = 0;
 	Acc = 0;
 	RECT desktop;
@@ -193,11 +197,61 @@ void Pacman::Update(int elapsedTime)
 			PState = PlayerState::Idle;
 
 	}
+	else 
+	{
+		PState = PlayerState::Jumping;
+		Velocity->Y += Gravity;
+	}
+
+	InputHandler(elapsedTime);
+	_pacmanPrevPosition->X = _pacmanPosition->X;
+	_pacmanPrevPosition->Y = _pacmanPosition->Y;
+	_pacmanPosition->X += Velocity->X * elapsedTime;
+
+	_pacmanPosition->Y += Velocity->Y * elapsedTime;
+
+	gameObjectA->Rect->X = _pacmanPosition->X + 150;
+	gameObjectA->Rect->Y = _pacmanPosition->Y;
+
+	gameObjectB->Rect->X = 0;
+	gameObjectB->Rect->Y = Graphics::GetViewportHeight() - 73;
+
+	gameObjectC->Rect->X = Graphics::GetViewportWidth() - (5 * 73);
+	gameObjectC->Rect->Y = (Graphics::GetViewportHeight() - 200);
+
+	PlatformCollider->Rect->X = (Graphics::GetViewportWidth() / 2) - (73 * 2);
+	PlatformCollider->Rect->Y = (Graphics::GetViewportHeight() / 2);
+
+
+	collisionManager->Update(elapsedTime);
+
+	//contact = IsColliding();
+	//cout << IsColliding();
+	cout << abs(gameObjectA->OverlapSize->X) << endl;
+	cout << abs(gameObjectA->OverlapSize->Y) << endl;
+
+
+	if (abs(gameObjectA->OverlapSize->X) > 0.0f || abs(gameObjectA->OverlapSize->Y) > 0.0f)
+	{
+		_pacmanPosition->Y = _pacmanPrevPosition->Y;
+
+		_pacmanPosition->X = _pacmanPrevPosition->X;
+		gameObjectA->OverlapSize->X = 0;
+
+		gameObjectA->OverlapSize->Y = 0;
+
+		Velocity->Y = 0;
+
+		if (Velocity->X == 0)
+			PState = PlayerState::Idle;
+
+	}
 	else
 	{
 		PState = PlayerState::Jumping;
 		Velocity->Y += Gravity;
 	}
+
 }
 
 void Pacman::Draw(int elapsedTime)
@@ -270,9 +324,7 @@ void Pacman::Draw(int elapsedTime)
 
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
-	gameObjectA->DrawDebug();
-	gameObjectB->DrawDebug(Color(1.0f, 0.0f, 0.0f, 0.3f));
-	gameObjectC->DrawDebug(Color(0.0f, 1.0f, 0.0f, 0.3f));
+	DrawDebugs(false);
 	SpriteBatch::EndDraw(); // Ends Drawing
 }
 
@@ -359,7 +411,7 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 
 bool Pacman::Jump(int elapsedTime)
 {
-	if (gameObjectA->OverlapSize->X != 0.0f && gameObjectA->OverlapSize->Y != 0.0f)
+	if (_pacmanPosition->Y == _pacmanPrevPosition->Y)
 		Velocity->Y = -JumpForce;
 	//if (Acc >= 0 && !hasJumped)
 	//{
@@ -389,6 +441,17 @@ bool Pacman::Jump(int elapsedTime)
 	//	}
 	//}
 	return false;
+}
+
+void Pacman::DrawDebugs(bool draw)
+{
+	if (draw)
+	{
+		gameObjectA->DrawDebug();
+		gameObjectB->DrawDebug(Color(1.0f, 0.0f, 0.0f, 0.3f));
+		gameObjectC->DrawDebug(Color(0.0f, 1.0f, 0.0f, 0.3f));
+		PlatformCollider->DrawDebug(Color(0.0f, 1.0f, 0.0f, 0.3f));
+	}
 }
 
 int Pacman::random(int min, int max) //range : [min, max]

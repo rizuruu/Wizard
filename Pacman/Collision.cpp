@@ -23,6 +23,7 @@ Collision::Collision()
 void Collision::DrawDebug(Color color)
 {
 	SpriteBatch::DrawRectangle(Rect, &color);
+	cout << Rect->Y;
 }
 
 void Collision::UpdateCollision(Collision &other)

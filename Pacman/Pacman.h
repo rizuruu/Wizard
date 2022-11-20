@@ -112,9 +112,12 @@ public:
 	bool virtual Jump(int elapsedTime);
 	int random(int min, int max);
 
+	void virtual DrawDebugs(bool draw = false);
+
 	Collision* gameObjectA;
 	Collision* gameObjectB;
 	Collision* gameObjectC;
+	Collision* PlatformCollider;
 
 
 	enum class PlayerState
