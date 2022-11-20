@@ -1,39 +1,70 @@
 #include "Collision.h"
+#include "CollisionManager.h"
+#include <iostream>
+#include "S2D/S2D.h"
+using namespace S2D;
 
-//bool Collision::IsColliding(GameObject gameObjectA, GameObject gameObjectB)
-//{
-//	switch (gameObjectA.Collision.Type)
-//	{
-//		case CollisionType::None:
-//			//Do nothing
-//			break;
-//		case CollisionType::Box:
-//			if (gameObjectA.Position.X >= gameObjectB.Position.X &&
-//				gameObjectA.Position.X < gameObjectB.Position.X + gameObjectB.Collision.Width &&
-//				gameObjectA.Position.Y >= gameObjectB.Position.Y &&
-//				gameObjectA.Position.Y < gameObjectB.Position.Y + gameObjectB.Collision.Height)
-//				return true; // Bottom Right Collision
-//			else if (gameObjectB.Position.X >= gameObjectA.Position.X &&
-//				gameObjectB.Position.X < gameObjectA.Position.X + gameObjectA.Collision.Width &&
-//				gameObjectB.Position.Y >= gameObjectA.Position.Y &&
-//				gameObjectB.Position.Y < gameObjectA.Position.Y + gameObjectA.Collision.Height)
-//				return true; // Top Left Collision
-//			else if (gameObjectB.Position.X + gameObjectB.Collision.Width >= gameObjectA.Position.X &&
-//				gameObjectB.Position.X + gameObjectB.Collision.Width < gameObjectA.Position.X + gameObjectA.Collision.Width &&
-//				gameObjectB.Position.Y + gameObjectB.Collision.Height >= gameObjectA.Position.Y &&
-//				gameObjectB.Position.Y + gameObjectB.Collision.Height < gameObjectA.Position.Y + gameObjectA.Collision.Height)
-//				return true; // Top Right Collision
-//			else if (gameObjectA.Position.X + gameObjectA.Collision.Width >= gameObjectB.Position.X &&
-//				gameObjectA.Position.X + gameObjectA.Collision.Width < gameObjectB.Position.X + gameObjectB.Collision.Width &&
-//				gameObjectA.Position.Y + gameObjectA.Collision.Height >= gameObjectB.Position.Y &&
-//				gameObjectA.Position.Y + gameObjectA.Collision.Height < gameObjectB.Position.Y + gameObjectB.Collision.Height)
-//				return true; // Bottom Left Collision
-//			else 
-//				return false;
-//			break;
-//		case CollisionType::Circle:
-//			break;
-//		default:
-//			return false;
-//	}
-//}
+Collision::Collision(CollisionType Type)
+{
+	Rect = new S2D::Rect();
+	OverlapSize = new Vector2();
+	if (CollisionManager::Instance != NULL)
+	{
+		std::cout << "yourmum";
+		this->Type = Type;
+		CollisionManager::Instance->Collisions->push_back(this);
+	}
+}
+
+Collision::Collision()
+{
+}
+
+void Collision::DrawDebug(Color color)
+{
+	SpriteBatch::DrawRectangle(Rect, &color);
+}
+
+void Collision::UpdateCollision(Collision &other)
+{
+	if (other.Rect->X + other.Rect->Width >= Rect->X &&
+		other.Rect->X + other.Rect->Width < Rect->X + Rect->Width &&
+		other.Rect->Y >= Rect->Y &&
+		other.Rect->Y < Rect->Y + Rect->Height)
+	{
+		cout << "top right" << endl;
+		OverlapSize->X += other.Rect->X - (Rect->X + Rect->Width); // Top Right Collision
+		OverlapSize->Y += other.Rect->Y - (Rect->Y + Rect->Height); // Top Right Collision
+	}
+	else if (Rect->X + Rect->Width >= other.Rect->X &&
+		Rect->X + Rect->Width < other.Rect->X + other.Rect->Width &&
+		Rect->Y + Rect->Height >= other.Rect->Y &&
+		Rect->Y + Rect->Height < other.Rect->Y + other.Rect->Height)
+	{
+		cout << "bottom left" << endl;
+		OverlapSize->X += Rect->X + ((other.Rect->X + other.Rect->Width) - Rect->Width); // Bottom Left Collision
+		OverlapSize->Y += (Rect->Y + Rect->Height) - other.Rect->Y;
+	}
+	else if (Rect->X >= other.Rect->X &&
+		Rect->X < other.Rect->X + other.Rect->Width &&
+		Rect->Y + Rect->Height >= other.Rect->Y &&
+		Rect->Y + Rect->Height < other.Rect->Y + other.Rect->Height)
+	{
+		cout << "bottom right" << endl;
+		OverlapSize->X += other.Rect->X - (Rect->X + Rect->Width); // Bottom Right Collision
+		OverlapSize->Y += Rect->Y - (other.Rect->Y + other.Rect->Height); 
+
+		//OverlapSize = new Vector2(other.Rect->X, other.Rect->Y); // Bottom Right Collision
+	}
+	else if (other.Rect->X >= Rect->X &&
+		other.Rect->X < Rect->X + Rect->Width &&
+		other.Rect->Y >= Rect->Y &&
+		other.Rect->Y < Rect->Y + Rect->Height)
+	{
+		cout << "top left" << endl;
+		OverlapSize->X += Rect->X - (other.Rect->X + other.Rect->Width); // Top Left Collision
+		OverlapSize->Y += other.Rect->Y - (Rect->Y + Rect->Height); 
+
+		//OverlapSize = new Vector2(other.Rect->X + other.Rect->Width, other.Rect->Y + other.Rect->Height); // Top Left Collision
+	}
+}

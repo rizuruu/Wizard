@@ -6,20 +6,29 @@ using namespace S2D;
 class Collision
 {
 public:
-	int Radius;
-	int Width;
-	int Height;
-	float X;
-	float Y;
+	enum class CollisionType
+	{
+		Static,
+		Dynamic
+	};
 
+
+	Collision(CollisionType Type);
+	Collision();
+	Rect* Rect;
+	Vector2* OverlapSize;
 	//bool virtual IsColliding(GameObject gameObjectA, GameObject gameObjectB);
 
-	enum class CollisionType
+	enum class CollisionShape
 	{
 		None,
 		Box,
 		Circle,
 	};
+	
+	CollisionShape Shape = CollisionShape::None;
+	CollisionType Type = CollisionType::Static;
 
-	CollisionType Type = CollisionType::None;
+	void DrawDebug(Color color = Color(1.0f, 1.0f, 1.0f, 0.3f));
+	void UpdateCollision(Collision &other);
 };

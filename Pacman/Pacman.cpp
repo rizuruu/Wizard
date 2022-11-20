@@ -7,11 +7,14 @@
 #include "wtypes.h"
 #include <windows.h>
 #include <iostream>
+#include <cstdlib>
 #include "Collision.h"
 using namespace std;
 
 Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), _cPacmanFrameTime(250)
 {
+	collisionManager = new CollisionManager();
+
 	hasJumped = false;
 	_frameCount = 0;
 	_paused = false;
@@ -22,6 +25,29 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	JumpFramesVector = new S2D::Vector2(3, 2);
 	AttackFramesVector = new S2D::Vector2(5, 5);
 	FlowerFramesVector = new S2D::Vector2(10, 6);
+
+	gameObjectA = new Collision(Collision::CollisionType::Dynamic);
+	gameObjectA->Rect->Width = 200.0f;
+	gameObjectA->Rect->Height = 400.0f;
+	gameObjectA->Rect->X = 1920/2;
+	gameObjectA->Rect->Y = 1080/2;
+	
+
+	//gameObjectA.Type = Collision::CollisionType::Dynamic;
+	gameObjectB = new Collision(Collision::CollisionType::Static);
+	//gameObjectB.Type = Collision::CollisionType::Static;
+
+	gameObjectB->Rect->Width = 5000;
+	gameObjectB->Rect->Height = 73;
+	gameObjectB->Rect->X = 0;
+	gameObjectB->Rect->Y = 1000;
+
+	gameObjectC = new Collision(Collision::CollisionType::Static);
+	gameObjectC->Rect->Width = 73*5;
+	gameObjectC->Rect->Height = 73*2;
+	gameObjectC->Rect->X = 1600;
+	gameObjectC->Rect->Y = 900;
+
 	CurrentFrame = 0;
 	Acc = 0;
 	RECT desktop;
@@ -76,8 +102,10 @@ void Pacman::LoadContent()
 	_AttackTexture->Load("Textures/Ghost2_Attack.png", false);
 	Tile->Load("Textures/TileSet.png", false);
 	VegetationA->Load("Textures/VegetationA.png", false);
-	_pacmanPosition = new Vector2(-128.0f, Graphics::GetViewportHeight() - 512);
+	_pacmanPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
+	_pacmanPrevPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	_JumpPosition = new Vector2(_pacmanPosition->X, _pacmanPosition->Y - 80);
+	Velocity = new Vector2(0.0f, 0.0f);
 	int t = 0;
 
 	InitializeSequences();
@@ -128,6 +156,48 @@ void Pacman::InitializeSequences()
 void Pacman::Update(int elapsedTime)
 {
 	InputHandler(elapsedTime);
+	_pacmanPrevPosition->X = _pacmanPosition->X;
+	_pacmanPrevPosition->Y = _pacmanPosition->Y;
+	_pacmanPosition->X += Velocity->X * elapsedTime;
+
+	_pacmanPosition->Y += Velocity->Y * elapsedTime;
+
+	gameObjectA->Rect->X = _pacmanPosition->X + 150;
+	gameObjectA->Rect->Y = _pacmanPosition->Y;
+
+	gameObjectB->Rect->X = 0;
+	gameObjectB->Rect->Y = Graphics::GetViewportHeight() - 73;
+
+	gameObjectC->Rect->X = Graphics::GetViewportWidth() - (5 * 73);
+	gameObjectC->Rect->Y = (Graphics::GetViewportHeight() - 200);
+
+	collisionManager->Update(elapsedTime);
+
+	//contact = IsColliding();
+	//cout << IsColliding();
+	cout << abs(gameObjectA->OverlapSize->X) << endl;
+	cout << abs(gameObjectA->OverlapSize->Y) << endl;
+
+	if (abs(gameObjectA->OverlapSize->X) > 0.0f || abs(gameObjectA->OverlapSize->Y) > 0.0f)
+	{
+		_pacmanPosition->Y = _pacmanPrevPosition->Y;
+
+		_pacmanPosition->X = _pacmanPrevPosition->X;
+		gameObjectA->OverlapSize->X = 0;
+
+		gameObjectA->OverlapSize->Y = 0;
+		
+		Velocity->Y = 0;
+
+		if (Velocity->X == 0)
+			PState = PlayerState::Idle;
+
+	}
+	else
+	{
+		PState = PlayerState::Jumping;
+		Velocity->Y += Gravity;
+	}
 }
 
 void Pacman::Draw(int elapsedTime)
@@ -136,7 +206,7 @@ void Pacman::Draw(int elapsedTime)
 
 	// Allows us to easily create a string
 	std::stringstream stream;
-	stream << "Player X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y;
+	stream << "Player X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y << " Velocity X: " << Velocity->X << " Velocity Y: " << Velocity->Y;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
 	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, (Graphics::GetViewportHeight() - 200)), false, 0.3f);
@@ -200,15 +270,14 @@ void Pacman::Draw(int elapsedTime)
 
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
-
+	gameObjectA->DrawDebug();
+	gameObjectB->DrawDebug(Color(1.0f, 0.0f, 0.0f, 0.3f));
+	gameObjectC->DrawDebug(Color(0.0f, 1.0f, 0.0f, 0.3f));
 	SpriteBatch::EndDraw(); // Ends Drawing
 }
 
 void Pacman::InputHandler(int elapsedTime)
 {
-	if (PState == PlayerState::Jumping)
-		return;
-
 	// Gets the current state of the keyboard
 	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
 	Input::MouseState* mouseState = Input::Mouse::GetState();
@@ -222,7 +291,8 @@ void Pacman::InputHandler(int elapsedTime)
 		}
 		else if (keyboardState->IsKeyDown(Input::Keys::A))
 		{
-			_pacmanPosition->X -= _cPacmanSpeed * elapsedTime;
+			//_pacmanPosition->X -= _cPacmanSpeed * elapsedTime;
+			Velocity->X = -_cPacmanSpeed;
 			PState = PlayerState::Running;
 			isFlipped = true;
 		}
@@ -233,23 +303,21 @@ void Pacman::InputHandler(int elapsedTime)
 		}
 		else if (keyboardState->IsKeyDown(Input::Keys::D))
 		{
-			if (!IsColliding())
-			{
-				_pacmanPosition->X += _cPacmanSpeed * elapsedTime;
-				PState = PlayerState::Running;
-				isFlipped = false;
-			}
+			Velocity->X = _cPacmanSpeed;
+			PState = PlayerState::Running;
+			isFlipped = false;
 		}
-		else if (keyboardState->IsKeyDown(Input::Keys::SPACE))
-		{
-			PState = PlayerState::Jumping;
-		}
-		//else if (mouseState->LeftButton == Input::ButtonState::PRESSED)
-		//	PState = PlayerState::Attacking;
 		else
 		{
 			PState = PlayerState::Idle;
+			Velocity->X = 0.0f;
 		}
+
+		if (keyboardState->IsKeyDown(Input::Keys::SPACE))
+		{
+			Jump(elapsedTime);
+		}
+
 
 		if (_pacmanPosition->X > Graphics::GetViewportWidth())
 		{
@@ -264,7 +332,6 @@ void Pacman::InputHandler(int elapsedTime)
 	}
 	if (keyboardState->IsKeyUp(Input::Keys::P))
 		_pKeyDown = false;
-
 }
 
 void Pacman::DrawPlayerAnimation(int elapsedTime)
@@ -282,8 +349,6 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 			break;
 		case PlayerState::Jumping:
 			JumpAnimator->PlaySequence(_pacmanPosition, isFlipped);
-			if (Jump(elapsedTime))
-				PState = PlayerState::Idle;
 			break;
 		case PlayerState::Attacking:
 			if (AttackAnimator->PlaySequenceOnce(_pacmanPosition, isFlipped))
@@ -294,34 +359,36 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 
 bool Pacman::Jump(int elapsedTime)
 {
+	if (gameObjectA->OverlapSize->X != 0.0f && gameObjectA->OverlapSize->Y != 0.0f)
+		Velocity->Y = -JumpForce;
+	//if (Acc >= 0 && !hasJumped)
+	//{
+	//	Acc += 0.2f * elapsedTime;
+	//	_pacmanPosition->Y -= Acc;
+	//	if (Acc >= 50)
+	//	{ 
+	//		Acc = 0;
+	//		hasJumped = true;
+	//	} 
+	//	return false;
+	//}
+	//else if (hasJumped)
+	//{
+	//	if (Acc <= 50)
+	//	{
+	//		Acc += _cPacmanSpeed * elapsedTime;
+	//		_pacmanPosition->Y += Acc;
+	//		return false;
 
-	if (Acc >= 0 && !hasJumped)
-	{
-		Acc += 0.2f * elapsedTime;
-		_pacmanPosition->Y -= Acc;
-		if (Acc >= 50)
-		{ 
-			Acc = 0;
-			hasJumped = true;
-		} 
-		return false;
-	}
-	else if (hasJumped)
-	{
-		if (Acc <= 50)
-		{
-			Acc += _cPacmanSpeed * elapsedTime;
-			_pacmanPosition->Y += Acc;
-			return false;
-
-		}
-		else
-		{
-			hasJumped = false;
-			Acc = 0;
-			return true;
-		}
-	}
+	//	}
+	//	else
+	//	{
+	//		hasJumped = false;
+	//		Acc = 0;
+	//		return true;
+	//	}
+	//}
+	return false;
 }
 
 int Pacman::random(int min, int max) //range : [min, max]
@@ -335,42 +402,4 @@ int Pacman::random(int min, int max) //range : [min, max]
 	return min + rand() % ((max + 1) - min);
 }
 
-bool Pacman::IsColliding()
-{
-	Collision gameObjectA = Collision();
-	Collision gameObjectB = Collision();
-
-	gameObjectA.Width = 512.0f;
-	gameObjectA.Height = 512.0f;
-	gameObjectA.X = _pacmanPosition->X;
-	gameObjectA.Y = _pacmanPosition->Y;
-
-	gameObjectB.Width = 153.6f;
-	gameObjectB.Height = 153.6f;
-	gameObjectB.X = Graphics::GetViewportWidth() - 146, 
-	gameObjectB.Y = Graphics::GetViewportHeight() - 200;
-
-	if (gameObjectA.X >= gameObjectB.X &&
-		gameObjectA.X < gameObjectB.X + gameObjectB.Width &&
-		gameObjectA.Y >= gameObjectB.Y &&
-		gameObjectA.Y < gameObjectB.Y + gameObjectB.Height)
-		return true; // Bottom Right Collision
-	else if (gameObjectB.X >= gameObjectA.X &&
-		gameObjectB.X < gameObjectA.X + gameObjectA.Width &&
-		gameObjectB.Y >= gameObjectA.Y &&
-		gameObjectB.Y < gameObjectA.Y + gameObjectA.Height)
-		return true; // Top Left Collision
-	else if (gameObjectB.X + gameObjectB.Width >= gameObjectA.X &&
-		gameObjectB.X + gameObjectB.Width < gameObjectA.X + gameObjectA.Width &&
-		gameObjectB.Y + gameObjectB.Height >= gameObjectA.Y &&
-		gameObjectB.Y + gameObjectB.Height < gameObjectA.Y + gameObjectA.Height)
-		return true; // Top Right Collision
-	else if (gameObjectA.X + gameObjectA.Width >= gameObjectB.X &&
-		gameObjectA.X + gameObjectA.Width < gameObjectB.X + gameObjectB.Width &&
-		gameObjectA.Y + gameObjectA.Height >= gameObjectB.Y &&
-		gameObjectA.Y + gameObjectA.Height < gameObjectB.Y + gameObjectB.Height)
-		return true; // Bottom Left Collision
-	else
-		return false;
-}
 

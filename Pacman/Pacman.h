@@ -13,6 +13,8 @@
 #include <list>
 #include <vector>
 #include "AnimationSequence.h"
+#include "Collision.h"
+#include "CollisionManager.h"
 // Reduces the amount of typing by including all classes in S2D namespace
 using namespace S2D;
 
@@ -24,6 +26,7 @@ class Pacman : public Game
 private:
 	// Data to represent Pacman
 	Vector2* _pacmanPosition;
+	Vector2* _pacmanPrevPosition;
 	Vector2* _JumpPosition;
 	Rect* _pacmanSourceRect;
 	Texture2D* _pacmanTexture;
@@ -81,6 +84,11 @@ private:
 	SoundEffect* music;
 	const float _cPacmanSpeed = 0.1f;
 
+	Vector2* Velocity;
+	const float Gravity = 0.1f;
+	float JumpForce = 1.0f;
+
+	CollisionManager* collisionManager;
 public:
 	/// <summary> Constructs the Pacman class. </summary>
 	Pacman(int argc, char* argv[]);
@@ -104,7 +112,10 @@ public:
 	bool virtual Jump(int elapsedTime);
 	int random(int min, int max);
 
-	bool virtual IsColliding();
+	Collision* gameObjectA;
+	Collision* gameObjectB;
+	Collision* gameObjectC;
+
 
 	enum class PlayerState
 	{
