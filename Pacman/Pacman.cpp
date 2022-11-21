@@ -324,7 +324,7 @@ void Pacman::Draw(int elapsedTime)
 
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
-	DrawDebugs(false);
+	DrawDebugs(true);
 	SpriteBatch::EndDraw(); // Ends Drawing
 }
 
