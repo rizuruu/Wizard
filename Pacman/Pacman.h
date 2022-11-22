@@ -108,6 +108,7 @@ public:
 	void virtual Draw(int elapsedTime);
 
 	void virtual DrawPlayerAnimation(int elapsedTime);
+	void virtual DrawEnvironment(int elapsedTime);
 	void virtual InputHandler(int elapsedTime);
 	void virtual Jump(int elapsedTime);
 	int random(int min, int max);
