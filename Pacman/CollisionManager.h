@@ -10,6 +10,7 @@ class CollisionManager
 public:
 	CollisionManager();
 
+	~CollisionManager();
 	static CollisionManager* Instance;
 	vector<Collision*>* Collisions;
 

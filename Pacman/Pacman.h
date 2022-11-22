@@ -86,7 +86,7 @@ private:
 
 	Vector2* Velocity;
 	const float Gravity = 0.1f;
-	float JumpForce = 1.0f;
+	float JumpForce = 0.8f;
 
 	CollisionManager* collisionManager;
 public:
@@ -109,7 +109,7 @@ public:
 
 	void virtual DrawPlayerAnimation(int elapsedTime);
 	void virtual InputHandler(int elapsedTime);
-	bool virtual Jump(int elapsedTime);
+	void virtual Jump(int elapsedTime);
 	int random(int min, int max);
 
 	void virtual DrawDebugs(bool draw = false);

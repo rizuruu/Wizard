@@ -28,7 +28,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 
 	gameObjectA = new Collision(Collision::CollisionType::Dynamic);
 	gameObjectA->Rect->Width = 200.0f;
-	gameObjectA->Rect->Height = 400.0f;
+	gameObjectA->Rect->Height = 378.0f;
 	gameObjectA->Rect->X = 1920/2;
 	gameObjectA->Rect->Y = 1080/2;
 	
@@ -37,16 +37,14 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	gameObjectB = new Collision(Collision::CollisionType::Static);
 	//gameObjectB.Type = Collision::CollisionType::Static;
 
-	gameObjectB->Rect->Width = 5000;
-	gameObjectB->Rect->Height = 73;
-	gameObjectB->Rect->X = 0;
-	gameObjectB->Rect->Y = 1000;
+	gameObjectB->Rect->Width = 1920;
+	gameObjectB->Rect->Height = 73*1;
 
 	gameObjectC = new Collision(Collision::CollisionType::Static);
 	gameObjectC->Rect->Width = 73*5;
 	gameObjectC->Rect->Height = 73*2;
 	gameObjectC->Rect->X = 1600;
-	gameObjectC->Rect->Y = 900;
+	gameObjectC->Rect->Y = 0;
 
 	PlatformCollider = new Collision(Collision::CollisionType::Static);
 	PlatformCollider->Rect->Height = 73 * 2;
@@ -61,7 +59,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	GetWindowRect(hDesktop, &desktop);
 	//Initialise important Game aspects
 	S2D::Audio::Initialise();
-	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, false, 25, 25, "Pacman", 60);
+	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, true, 25, 25, "Pacman", 60);
 	Input::Initialise();
 
 	// Start the Game Loop - This calls Update and Draw in game loop
@@ -75,6 +73,11 @@ Pacman::~Pacman()
 	delete _munchieBlueTexture;
 	delete _munchieInvertedTexture;
 	delete _munchieRect;
+
+	delete gameObjectA;
+	delete gameObjectB;
+	delete gameObjectC;
+	delete PlatformCollider;
 }
 
 void Pacman::LoadContent()
@@ -216,7 +219,7 @@ void Pacman::Update(int elapsedTime)
 	gameObjectB->Rect->X = 0;
 	gameObjectB->Rect->Y = Graphics::GetViewportHeight() - 73;
 
-	gameObjectC->Rect->X = Graphics::GetViewportWidth() - (5 * 73);
+	gameObjectC->Rect->X = Graphics::GetViewportWidth() - (4 * 73);
 	gameObjectC->Rect->Y = (Graphics::GetViewportHeight() - 200);
 
 	PlatformCollider->Rect->X = (Graphics::GetViewportWidth() / 2) - (73 * 2);
@@ -248,8 +251,11 @@ void Pacman::Update(int elapsedTime)
 	}
 	else
 	{
-		PState = PlayerState::Jumping;
-		Velocity->Y += Gravity;
+		if (Velocity->Y != 0)
+		{
+			PState = PlayerState::Jumping;
+		}
+			Velocity->Y += Gravity;
 	}
 
 }
@@ -286,45 +292,11 @@ void Pacman::Draw(int elapsedTime)
 		DrawPlayerAnimation(elapsedTime);
 	}
 
-	// Bottom right 
-	for (int i = 1; i < 6; i++)
-	{
-		int r = random(1, 2);
-		SpriteBatch::Draw(Tile, new Vector2(Graphics::GetViewportWidth() - (i*73), (Graphics::GetViewportHeight() - 200)), new Rect(0.0f, 0.0f, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
-	}
-
-	// Ground
-	for (int i = 0; i < 26; i++)
-	{
-		SpriteBatch::Draw(Tile, new Vector2(0 + i * 73, Graphics::GetViewportHeight() - 73), Tile_Rect, Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
-	}
-
-	// Top
-	for (int i = 2; i < 26; i++)
-	{
-		SpriteBatch::Draw(Tile, new Vector2(73 * i, -73), Tile_Rect2, Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
-	}
-
-	for (int i = 0; i < 3; i++)
-	{
-		SpriteBatch::Draw(Tile, new Vector2(73 * i, -73), new Rect(1024.0f, 512.0f, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
-	}
-	for (int i = 0; i < 3; i++)
-	{
-		SpriteBatch::Draw(Tile, new Vector2(73 * i, 73), new Rect(1024.0f, 1024.0f, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
-	}
-
-	// Platform
-	for (int i = 0; i < 3; i++)
-	{
-	}
-	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) - 73*3, (Graphics::GetViewportHeight() / 2)), new Rect(0 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
-	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) -73, (Graphics::GetViewportHeight() / 2)), new Rect(1 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
-	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(2 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	DrawEnvironment(elapsedTime);
 
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
-	DrawDebugs(true);
+	DrawDebugs(false);
 	SpriteBatch::EndDraw(); // Ends Drawing
 }
 
@@ -409,38 +381,49 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 	}
 }
 
-bool Pacman::Jump(int elapsedTime)
+void Pacman::DrawEnvironment(int elapsedTime)
+{
+	// Bottom right 
+	for (int i = 1; i < 6; i++)
+	{
+		int r = random(1, 2);
+		SpriteBatch::Draw(Tile, new Vector2(Graphics::GetViewportWidth() - (i * 73), (Graphics::GetViewportHeight() - 200)), new Rect(0.0f, 0.0f, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	}
+
+	// Ground
+	for (int i = 0; i < 26; i++)
+	{
+		SpriteBatch::Draw(Tile, new Vector2(0 + i * 73, Graphics::GetViewportHeight() - 73), Tile_Rect, Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	}
+
+	// Top
+	for (int i = 2; i < 26; i++)
+	{
+		SpriteBatch::Draw(Tile, new Vector2(73 * i, -73), Tile_Rect2, Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		SpriteBatch::Draw(Tile, new Vector2(73 * i, -73), new Rect(1024.0f, 512.0f, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	}
+	for (int i = 0; i < 3; i++)
+	{
+		SpriteBatch::Draw(Tile, new Vector2(73 * i, 73), new Rect(1024.0f, 1024.0f, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	}
+
+	// Platform
+	for (int i = 0; i < 3; i++)
+	{
+	}
+	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) - 73 * 3, (Graphics::GetViewportHeight() / 2)), new Rect(0 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) - 73, (Graphics::GetViewportHeight() / 2)), new Rect(1 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(2 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+}
+
+void Pacman::Jump(int elapsedTime)
 {
 	if (_pacmanPosition->Y == _pacmanPrevPosition->Y)
 		Velocity->Y = -JumpForce;
-	//if (Acc >= 0 && !hasJumped)
-	//{
-	//	Acc += 0.2f * elapsedTime;
-	//	_pacmanPosition->Y -= Acc;
-	//	if (Acc >= 50)
-	//	{ 
-	//		Acc = 0;
-	//		hasJumped = true;
-	//	} 
-	//	return false;
-	//}
-	//else if (hasJumped)
-	//{
-	//	if (Acc <= 50)
-	//	{
-	//		Acc += _cPacmanSpeed * elapsedTime;
-	//		_pacmanPosition->Y += Acc;
-	//		return false;
-
-	//	}
-	//	else
-	//	{
-	//		hasJumped = false;
-	//		Acc = 0;
-	//		return true;
-	//	}
-	//}
-	return false;
 }
 
 void Pacman::DrawDebugs(bool draw)
@@ -464,5 +447,3 @@ int Pacman::random(int min, int max) //range : [min, max]
 	}
 	return min + rand() % ((max + 1) - min);
 }
-
-

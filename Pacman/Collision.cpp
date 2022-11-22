@@ -20,6 +20,12 @@ Collision::Collision()
 {
 }
 
+Collision::~Collision()
+{
+	delete Rect;
+	delete OverlapSize;
+}
+
 void Collision::DrawDebug(Color color)
 {
 	SpriteBatch::DrawRectangle(Rect, &color);

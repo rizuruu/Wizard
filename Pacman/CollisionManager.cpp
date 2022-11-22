@@ -9,6 +9,12 @@ CollisionManager::CollisionManager()
 
 }
 
+CollisionManager::~CollisionManager()
+{
+	delete Collisions;
+	delete Instance;
+}
+
 void CollisionManager::Update(int elapsedTime)
 {
 	for (int i = 0; i < Collisions->size(); i++)

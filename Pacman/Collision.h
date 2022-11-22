@@ -15,6 +15,7 @@ public:
 
 	Collision(CollisionType Type);
 	Collision();
+	~Collision();
 	Rect* Rect;
 	Vector2* OverlapSize;
 	//bool virtual IsColliding(GameObject gameObjectA, GameObject gameObjectB);
