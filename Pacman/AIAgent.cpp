@@ -33,7 +33,7 @@ void AIAgent::UpdateAI(int elapsedTime)
 	collision->Rect->Y = rect->Y;
 	if (abs(collision->OverlapSize->X) > 0.0f || abs(collision->OverlapSize->Y) > 0.0f)
 	{
-		rect->Y = PrevPosition->Y;
+		rect->Y = PrevPosition->Y -1;
 
 
 		collision->OverlapSize->X = 0;
@@ -41,13 +41,18 @@ void AIAgent::UpdateAI(int elapsedTime)
 		collision->OverlapSize->Y = 0;
 
 		velocity->Y = 0;
+		CurrentState = AIState::Grounded;
 	}
 	else
 	{
+		CurrentState = AIState::InAir;
+
 		velocity->Y += 0.1f; //Gravity
 	}
+	
+	if (CurrentState == AIState::Grounded)
+		rect->X = MathHelper::Lerp(rect->X, Pacman::Instance->_pacmanPosition->X, 0.1f);
 
-	rect->X = MathHelper::Lerp(rect->X, Pacman::Instance->_pacmanPosition->X, 0.1f);
 }
 
 void AIAgent::DrawAI(int elapsedTime)

@@ -7,6 +7,13 @@ public:
 	AIAgent();
 	~AIAgent();
 
+	enum class AIState
+	{
+		Grounded,
+		InAir,
+	};
+
+	AIState CurrentState = AIState::InAir;
 	Vector2* velocity;
 	Vector2* PrevPosition;
 	Collision* collision;
