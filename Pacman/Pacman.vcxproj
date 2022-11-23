@@ -84,6 +84,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AIAgent.cpp" />
     <ClCompile Include="AnimationSequence.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
@@ -92,6 +93,7 @@
     <ClCompile Include="Sequence.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AIAgent.h" />
     <ClInclude Include="AnimationSequence.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="CollisionManager.h" />

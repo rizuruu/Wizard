@@ -10,7 +10,6 @@ Collision::Collision(CollisionType Type)
 	OverlapSize = new Vector2();
 	if (CollisionManager::Instance != NULL)
 	{
-		std::cout << "yourmum";
 		this->Type = Type;
 		CollisionManager::Instance->Collisions->push_back(this);
 	}
@@ -29,7 +28,6 @@ Collision::~Collision()
 void Collision::DrawDebug(Color color)
 {
 	SpriteBatch::DrawRectangle(Rect, &color);
-	cout << Rect->Y;
 }
 
 void Collision::UpdateCollision(Collision &other)

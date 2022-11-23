@@ -23,7 +23,6 @@ void CollisionManager::Update(int elapsedTime)
 		{
 			for (int j = 0; j < Collisions->size(); j++)
 			{
-
 				if ((*Collisions)[j]->Type == Collision::CollisionType::Static)
 				{
 					(*Collisions)[i]->UpdateCollision(*(* Collisions)[j]);

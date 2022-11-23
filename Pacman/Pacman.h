@@ -15,6 +15,7 @@
 #include "AnimationSequence.h"
 #include "Collision.h"
 #include "CollisionManager.h"
+#include "AIAgent.h"
 // Reduces the amount of typing by including all classes in S2D namespace
 using namespace S2D;
 
@@ -120,6 +121,7 @@ public:
 	Collision* gameObjectC;
 	Collision* PlatformCollider;
 
+	AIAgent* Enemy;
 
 	enum class PlayerState
 	{

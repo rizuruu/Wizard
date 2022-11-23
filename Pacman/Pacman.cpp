@@ -50,6 +50,8 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	PlatformCollider->Rect->Height = 73 * 2;
 	PlatformCollider->Rect->Width = 73 * 4;
 
+	Enemy = new AIAgent();
+
 	CurrentFrame = 0;
 	Acc = 0;
 	RECT desktop;
@@ -59,7 +61,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	GetWindowRect(hDesktop, &desktop);
 	//Initialise important Game aspects
 	S2D::Audio::Initialise();
-	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, true, 25, 25, "Pacman", 60);
+	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, false, 25, 25, "Pacman", 60);
 	Input::Initialise();
 
 	// Start the Game Loop - This calls Update and Draw in game loop
@@ -180,11 +182,6 @@ void Pacman::Update(int elapsedTime)
 
 	collisionManager->Update(elapsedTime);
 
-	//contact = IsColliding();
-	//cout << IsColliding();
-	cout << abs(gameObjectA->OverlapSize->X) << endl;
-	cout << abs(gameObjectA->OverlapSize->Y) << endl;
-
 	if (abs(gameObjectA->OverlapSize->X) > 0.0f || abs(gameObjectA->OverlapSize->Y) > 0.0f)
 	{
 		_pacmanPosition->Y = _pacmanPrevPosition->Y;
@@ -227,11 +224,7 @@ void Pacman::Update(int elapsedTime)
 
 
 	collisionManager->Update(elapsedTime);
-
-	//contact = IsColliding();
-	//cout << IsColliding();
-	cout << abs(gameObjectA->OverlapSize->X) << endl;
-	cout << abs(gameObjectA->OverlapSize->Y) << endl;
+	Enemy->UpdateAI(elapsedTime);
 
 
 	if (abs(gameObjectA->OverlapSize->X) > 0.0f || abs(gameObjectA->OverlapSize->Y) > 0.0f)
@@ -292,11 +285,12 @@ void Pacman::Draw(int elapsedTime)
 		DrawPlayerAnimation(elapsedTime);
 	}
 
+	Enemy->DrawAI(elapsedTime);
 	DrawEnvironment(elapsedTime);
 
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
-	DrawDebugs(false);
+	DrawDebugs(true);
 	SpriteBatch::EndDraw(); // Ends Drawing
 }
 
@@ -424,6 +418,8 @@ void Pacman::Jump(int elapsedTime)
 {
 	if (_pacmanPosition->Y == _pacmanPrevPosition->Y)
 		Velocity->Y = -JumpForce;
+
+	Enemy->velocity->Y = -JumpForce;
 }
 
 void Pacman::DrawDebugs(bool draw)
@@ -434,6 +430,7 @@ void Pacman::DrawDebugs(bool draw)
 		gameObjectB->DrawDebug(Color(1.0f, 0.0f, 0.0f, 0.3f));
 		gameObjectC->DrawDebug(Color(0.0f, 1.0f, 0.0f, 0.3f));
 		PlatformCollider->DrawDebug(Color(0.0f, 1.0f, 0.0f, 0.3f));
+		Enemy->collision->DrawDebug(Color(1.0f, 0.0f, 0.0f, 0.3f));
 	}
 }
 
