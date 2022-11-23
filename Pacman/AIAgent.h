@@ -8,6 +8,7 @@ public:
 	~AIAgent();
 
 	Vector2* velocity;
+	Vector2* PrevPosition;
 	Collision* collision;
 	Rect* rect;
 

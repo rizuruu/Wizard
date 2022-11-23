@@ -22,11 +22,13 @@ using namespace S2D;
 // Declares the Pacman class which inherits from the Game class.
 // This allows us to overload the Game class methods to help us
 // load content, draw and update our game.
+#ifndef _player
+#define _player
+
 class Pacman : public Game
 {
 private:
 	// Data to represent Pacman
-	Vector2* _pacmanPosition;
 	Vector2* _pacmanPrevPosition;
 	Vector2* _JumpPosition;
 	Rect* _pacmanSourceRect;
@@ -96,6 +98,7 @@ public:
 
 	/// <summary> Destroys any data associated with Pacman class. </summary>
 	virtual ~Pacman();
+	static Pacman* Instance;
 
 	/// <summary> All content should be loaded in this method. </summary>
 	void virtual LoadContent();
@@ -122,6 +125,7 @@ public:
 	Collision* PlatformCollider;
 
 	AIAgent* Enemy;
+	Vector2* _pacmanPosition;
 
 	enum class PlayerState
 	{
@@ -133,3 +137,4 @@ public:
 	
 	PlayerState PState = PlayerState::Idle;
 };
+#endif

@@ -10,9 +10,11 @@
 #include <cstdlib>
 #include "Collision.h"
 using namespace std;
+Pacman* Pacman::Instance = NULL;
 
 Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), _cPacmanFrameTime(250)
 {
+	Pacman::Instance = this;
 	collisionManager = new CollisionManager();
 
 	hasJumped = false;
@@ -61,7 +63,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	GetWindowRect(hDesktop, &desktop);
 	//Initialise important Game aspects
 	S2D::Audio::Initialise();
-	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, false, 25, 25, "Pacman", 60);
+	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, true, 25, 25, "Pacman", 60);
 	Input::Initialise();
 
 	// Start the Game Loop - This calls Update and Draw in game loop
@@ -250,7 +252,6 @@ void Pacman::Update(int elapsedTime)
 		}
 			Velocity->Y += Gravity;
 	}
-
 }
 
 void Pacman::Draw(int elapsedTime)
@@ -259,7 +260,7 @@ void Pacman::Draw(int elapsedTime)
 
 	// Allows us to easily create a string
 	std::stringstream stream;
-	stream << "Player X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y << " Velocity X: " << Velocity->X << " Velocity Y: " << Velocity->Y;
+	stream << "Player X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y << " Velocity X: " << Velocity->X << " Velocity Y: " << Velocity->Y << " Enemy X: " << Enemy->velocity->X << " Y: " << Enemy->velocity->Y;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
 	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, (Graphics::GetViewportHeight() - 200)), false, 0.3f);
@@ -418,8 +419,8 @@ void Pacman::Jump(int elapsedTime)
 {
 	if (_pacmanPosition->Y == _pacmanPrevPosition->Y)
 		Velocity->Y = -JumpForce;
-
-	Enemy->velocity->Y = -JumpForce;
+	if (Enemy->rect->Y == Enemy->PrevPosition->Y)
+		Enemy->velocity->Y = -JumpForce;
 }
 
 void Pacman::DrawDebugs(bool draw)
