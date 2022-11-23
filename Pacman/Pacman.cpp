@@ -94,6 +94,7 @@ void Pacman::LoadContent()
 	AttackAnimator = new AnimationSequence();
 	FlowerAnimator = new AnimationSequence();
 	WindPlantAnimator = new AnimationSequence();
+	BG = new AnimationSequence();
 	// Load Pacman
 	_pacmanTexture = new Texture2D();
 	_RunTexture = new Texture2D();
@@ -104,6 +105,7 @@ void Pacman::LoadContent()
 	Tile = new Texture2D();
 	VegetationA = new Texture2D();
 	WindPlant = new Texture2D();
+	BGTexture = new Texture2D();
 	_pacmanTexture->Load("Textures/PlayerIdle.png", false);
 	Platform->Load("Textures/Platform.png", false);
 	Flower->Load("Textures/Flower.png", false);
@@ -113,6 +115,7 @@ void Pacman::LoadContent()
 	_AttackTexture->Load("Textures/Ghost2_Attack.png", false);
 	Tile->Load("Textures/TileSet.png", false);
 	VegetationA->Load("Textures/VegetationA.png", false);
+	BGTexture->Load("Textures/BG.png", false);
 	_pacmanPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	_pacmanPrevPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	_JumpPosition = new Vector2(_pacmanPosition->X, _pacmanPosition->Y - 80);
@@ -162,6 +165,7 @@ void Pacman::InitializeSequences()
 
 	FlowerAnimator->Initialize(Flower, 60, FlowerFramesVector, 768, 768);
 	WindPlantAnimator->Initialize(WindPlant, 30, new Vector2(6, 5), 512, 512);
+	BG->Initialize(BGTexture, 30, new Vector2(6, 5), 512, 512);
 }
 
 void Pacman::Update(int elapsedTime)
@@ -263,6 +267,8 @@ void Pacman::Draw(int elapsedTime)
 	stream << "Player X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y << " Velocity X: " << Velocity->X << " Velocity Y: " << Velocity->Y << " Enemy X: " << Enemy->velocity->X << " Y: " << Enemy->velocity->Y;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
+	SpriteBatch::Draw(BGTexture, new Vector2((Graphics::GetViewportWidth() / 2), (Graphics::GetViewportHeight() / 2)), new Rect(2148.0, 2350.0, 1950.0f, 2048.0f), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+
 	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, (Graphics::GetViewportHeight() - 200)), false, 0.3f);
 	WindPlantAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f - 200, (Graphics::GetViewportHeight() - 180)), false, 0.3f);
 	for (int i = 0; i < 3; i++)
@@ -291,7 +297,7 @@ void Pacman::Draw(int elapsedTime)
 
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
-	DrawDebugs(true);
+	DrawDebugs(false);
 	SpriteBatch::EndDraw(); // Ends Drawing
 }
 
@@ -413,6 +419,8 @@ void Pacman::DrawEnvironment(int elapsedTime)
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) - 73 * 3, (Graphics::GetViewportHeight() / 2)), new Rect(0 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) - 73, (Graphics::GetViewportHeight() / 2)), new Rect(1 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(2 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	
+	
 }
 
 void Pacman::Jump(int elapsedTime)
