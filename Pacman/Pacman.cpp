@@ -94,7 +94,7 @@ void Pacman::LoadContent()
 	AttackAnimator = new AnimationSequence();
 	FlowerAnimator = new AnimationSequence();
 	WindPlantAnimator = new AnimationSequence();
-	BG = new AnimationSequence();
+	GreenSlimeAnimator = new AnimationSequence();
 	// Load Pacman
 	_pacmanTexture = new Texture2D();
 	_RunTexture = new Texture2D();
@@ -106,6 +106,7 @@ void Pacman::LoadContent()
 	VegetationA = new Texture2D();
 	WindPlant = new Texture2D();
 	BGTexture = new Texture2D();
+	GreenSlime = new Texture2D();
 	_pacmanTexture->Load("Textures/PlayerIdle.png", false);
 	Platform->Load("Textures/Platform.png", false);
 	Flower->Load("Textures/Flower.png", false);
@@ -116,6 +117,7 @@ void Pacman::LoadContent()
 	Tile->Load("Textures/TileSet.png", false);
 	VegetationA->Load("Textures/VegetationA.png", false);
 	BGTexture->Load("Textures/BG.png", false);
+	GreenSlime->Load("Textures/GreenSlime.png", false);
 	_pacmanPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	_pacmanPrevPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	_JumpPosition = new Vector2(_pacmanPosition->X, _pacmanPosition->Y - 80);
@@ -165,7 +167,7 @@ void Pacman::InitializeSequences()
 
 	FlowerAnimator->Initialize(Flower, 60, FlowerFramesVector, 768, 768);
 	WindPlantAnimator->Initialize(WindPlant, 30, new Vector2(6, 5), 512, 512);
-	BG->Initialize(BGTexture, 30, new Vector2(6, 5), 512, 512);
+	GreenSlimeAnimator->Initialize(GreenSlime, 30, new Vector2(5, 6), 376, 256);
 }
 
 void Pacman::Update(int elapsedTime)
@@ -292,7 +294,7 @@ void Pacman::Draw(int elapsedTime)
 		DrawPlayerAnimation(elapsedTime);
 	}
 
-	Enemy->DrawAI(elapsedTime);
+	Enemy->DrawAI(GreenSlimeAnimator);
 	DrawEnvironment(elapsedTime);
 
 	// Draws String

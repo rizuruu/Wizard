@@ -42,6 +42,7 @@ private:
 	Texture2D* VegetationA;
 	Texture2D* WindPlant;
 	Texture2D* BGTexture;
+	Texture2D* GreenSlime;
 	Rect* PlayerIdleFrames[24];
 	Rect* PlayerRunFrames[22];
 	Rect* PlayerAttackFrames[21];
@@ -84,7 +85,7 @@ private:
 	AnimationSequence* AttackAnimator;
 	AnimationSequence* FlowerAnimator;
 	AnimationSequence* WindPlantAnimator;
-	AnimationSequence* BG;
+	AnimationSequence* GreenSlimeAnimator;
 
 	SoundEffect* music;
 	const float _cPacmanSpeed = 0.1f;

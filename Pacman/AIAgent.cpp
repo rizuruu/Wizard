@@ -7,7 +7,7 @@ AIAgent::AIAgent()
 
 	velocity = new Vector2();
 	PrevPosition = new Vector2();
-	rect = new Rect(650, 500, 128, 256);
+	rect = new Rect(650, 500, 128, 128);
 	collision->Rect = rect;
 
 }
@@ -33,7 +33,7 @@ void AIAgent::UpdateAI(int elapsedTime)
 	collision->Rect->Y = rect->Y;
 	if (abs(collision->OverlapSize->X) > 0.0f || abs(collision->OverlapSize->Y) > 0.0f)
 	{
-		rect->Y = PrevPosition->Y -1;
+		rect->Y = PrevPosition->Y - 0.5f;
 
 
 		collision->OverlapSize->X = 0;
@@ -55,7 +55,8 @@ void AIAgent::UpdateAI(int elapsedTime)
 
 }
 
-void AIAgent::DrawAI(int elapsedTime)
+void AIAgent::DrawAI(AnimationSequence* sequence)
 {
-	SpriteBatch::DrawRectangle(rect, Color::White);
+	//SpriteBatch::DrawRectangle(rect, Color::White);
+	sequence->PlaySequence(new Vector2(rect->X, rect->Y), false, 0.5f);
 }

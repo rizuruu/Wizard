@@ -1,4 +1,5 @@
 #include "Collision.h"
+#include "AnimationSequence.h"
 
 #pragma once
 class AIAgent
@@ -20,5 +21,5 @@ public:
 	Rect* rect;
 
 	void UpdateAI(int elapsedTime);
-	void DrawAI(int elapsedTime);
+	void DrawAI(AnimationSequence* sequence);
 };
