@@ -35,10 +35,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	gameObjectA->Rect->Y = 1080/2;
 	
 
-	//gameObjectA.Type = Collision::CollisionType::Dynamic;
 	gameObjectB = new Collision(Collision::CollisionType::Static);
-	//gameObjectB.Type = Collision::CollisionType::Static;
-
 	gameObjectB->Rect->Width = 1920;
 	gameObjectB->Rect->Height = 73*1;
 
@@ -61,12 +58,11 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	const HWND hDesktop = GetDesktopWindow();
 	// Get the size of screen to the variable desktop
 	GetWindowRect(hDesktop, &desktop);
+
 	//Initialise important Game aspects
 	S2D::Audio::Initialise();
 	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, true, 25, 25, "Pacman", 60);
 	Input::Initialise();
-
-	// Start the Game Loop - This calls Update and Draw in game loop
 	Graphics::StartGameLoop();
 }
 
@@ -454,4 +450,8 @@ int Pacman::random(int min, int max) //range : [min, max]
 		first = false;
 	}
 	return min + rand() % ((max + 1) - min);
+}
+
+void Pacman::AudioHanlder()
+{
 }
