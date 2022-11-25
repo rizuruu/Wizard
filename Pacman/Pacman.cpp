@@ -29,8 +29,8 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 	FlowerFramesVector = new S2D::Vector2(10, 6);
 
 	gameObjectA = new Collision(Collision::CollisionType::Dynamic);
-	gameObjectA->Rect->Width = 200.0f;
-	gameObjectA->Rect->Height = 378.0f;
+	gameObjectA->Rect->Width = 100.0f;
+	gameObjectA->Rect->Height = 300.0f;
 	gameObjectA->Rect->X = 1920/2;
 	gameObjectA->Rect->Y = 1080/2;
 	
@@ -82,8 +82,6 @@ Pacman::~Pacman()
 
 void Pacman::LoadContent()
 {
-	music = new SoundEffect(true, 1.0f, 0.2f);
-	music->Load("Audio/BG_Music.wav");
 	IdleAnimator = new AnimationSequence();
 	RunAnimator = new AnimationSequence();
 	JumpAnimator = new AnimationSequence();
@@ -144,7 +142,6 @@ void Pacman::LoadContent()
 	_menuRectangle = new Rect(0.0f, 0.0f, Graphics::GetViewportWidth(), Graphics::GetViewportHeight());
 
 	_menuStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
-	//Audio::Play(music);
 }
 
 void Pacman::InitializeSequences()
@@ -181,7 +178,7 @@ void Pacman::Update(int elapsedTime)
 	gameObjectB->Rect->X = 0;
 	gameObjectB->Rect->Y = Graphics::GetViewportHeight() - 73;
 
-	gameObjectC->Rect->X = Graphics::GetViewportWidth() - (5 * 73);
+	gameObjectC->Rect->X = Graphics::GetViewportWidth() - (5 * 73 - 20);
 	gameObjectC->Rect->Y = (Graphics::GetViewportHeight() - 200);
 
 	collisionManager->Update(elapsedTime);
@@ -220,7 +217,7 @@ void Pacman::Update(int elapsedTime)
 	gameObjectB->Rect->X = 0;
 	gameObjectB->Rect->Y = Graphics::GetViewportHeight() - 73;
 
-	gameObjectC->Rect->X = Graphics::GetViewportWidth() - (4 * 73);
+	gameObjectC->Rect->X = Graphics::GetViewportWidth() - (5 * 73 - 20);
 	gameObjectC->Rect->Y = (Graphics::GetViewportHeight() - 200);
 
 	PlatformCollider->Rect->X = (Graphics::GetViewportWidth() / 2) - (73 * 2);
@@ -258,28 +255,14 @@ void Pacman::Update(int elapsedTime)
 
 void Pacman::Draw(int elapsedTime)
 {
-	//_pacmanPosition->Y = (Graphics::GetViewportHeight() / 2 + 16);
-
-	// Allows us to easily create a string
 	std::stringstream stream;
 	stream << "Player X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y << " Velocity X: " << Velocity->X << " Velocity Y: " << Velocity->Y << " Enemy X: " << Enemy->velocity->X << " Y: " << Enemy->velocity->Y;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
-	SpriteBatch::Draw(BGTexture, new Vector2((Graphics::GetViewportWidth() / 2), (Graphics::GetViewportHeight() / 2)), new Rect(2148.0, 2350.0, 1950.0f, 2048.0f), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
-
-	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, (Graphics::GetViewportHeight() - 200)), false, 0.3f);
-	WindPlantAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f - 200, (Graphics::GetViewportHeight() - 180)), false, 0.3f);
-	for (int i = 0; i < 3; i++)
-	{
-		SpriteBatch::Draw(Tile, new Vector2(73*i, Graphics::GetViewportHeight() - 300), new Rect(0.0f, 0.0f, 510, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::FLIPHORIZONTAL);
-	}
-	SpriteBatch::Draw(Tile, new Vector2(73 * 2, (Graphics::GetViewportHeight() - 200)), new Rect(1024.0f, 512.0f, 510, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
-	SpriteBatch::Draw(VegetationA, new Vector2(73*2, (Graphics::GetViewportHeight() - 200)), new Rect(0.0f, 7 * 1024.0f, 510, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
-
+	DrawEnvironmentBack(elapsedTime);
 	SpriteBatch::DrawRectangle(new Rect(0, 0, 1920, 1080), new Color(0.0f, 0.341f, 0.416f, 0.5f)); //0.443, 0.761, 0.788
 
 	if (_paused)
-
 	{
 		std::stringstream menuStream; menuStream << "PAUSED!";
 		_menuStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
@@ -291,11 +274,11 @@ void Pacman::Draw(int elapsedTime)
 	}
 
 	Enemy->DrawAI(GreenSlimeAnimator);
-	DrawEnvironment(elapsedTime);
+	DrawEnvironmentFront(elapsedTime);
+	DrawDebugs(false);
 
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
-	DrawDebugs(false);
 	SpriteBatch::EndDraw(); // Ends Drawing
 }
 
@@ -365,22 +348,22 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 	switch (PState)
 	{
 		case PlayerState::Idle:
-			IdleAnimator->PlaySequence(_pacmanPosition, isFlipped);
+			IdleAnimator->PlaySequence(_pacmanPosition, isFlipped, 0.8f);
 			break;
 		case PlayerState::Running:
-			RunAnimator->PlaySequence(_pacmanPosition, isFlipped);
+			RunAnimator->PlaySequence(_pacmanPosition, isFlipped, 0.8f);
 			break;
 		case PlayerState::Jumping:
-			JumpAnimator->PlaySequence(_pacmanPosition, isFlipped);
+			JumpAnimator->PlaySequence(_pacmanPosition, isFlipped, 0.8f);
 			break;
 		case PlayerState::Attacking:
-			if (AttackAnimator->PlaySequenceOnce(_pacmanPosition, isFlipped))
+			if (AttackAnimator->PlaySequenceOnce(_pacmanPosition, isFlipped, 0.8f))
 				PState = PlayerState::Idle;
 			break;
 	}
 }
 
-void Pacman::DrawEnvironment(int elapsedTime)
+void Pacman::DrawEnvironmentFront(int elapsedTime)
 {
 	// Bottom right 
 	for (int i = 1; i < 6; i++)
@@ -418,7 +401,31 @@ void Pacman::DrawEnvironment(int elapsedTime)
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) - 73, (Graphics::GetViewportHeight() / 2)), new Rect(1 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(2 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	
-	
+
+	//SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(512.0f * 4, 512.0f * 0, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	//SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(512.0f * 5, 512.0f * 0, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+}
+
+void Pacman::DrawEnvironmentBack(int elapsedTime)
+{
+	SpriteBatch::Draw(BGTexture, new Vector2((Graphics::GetViewportWidth() / 2), (Graphics::GetViewportHeight() / 2)), new Rect(2148.0, 2350.0, 1950.0f, 2048.0f), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+
+	FlowerAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f, (Graphics::GetViewportHeight() - 200)), false, 0.3f);
+	WindPlantAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f - 200, (Graphics::GetViewportHeight() - 180)), false, 0.3f);
+	for (int i = 0; i < 3; i++)
+	{
+		SpriteBatch::Draw(Tile, new Vector2(73 * i, Graphics::GetViewportHeight() - 300), new Rect(0.0f, 0.0f, 510, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::FLIPHORIZONTAL);
+	}
+	SpriteBatch::Draw(Tile, new Vector2(73 * 2, (Graphics::GetViewportHeight() - 200)), new Rect(1024.0f, 512.0f, 510, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	SpriteBatch::Draw(VegetationA, new Vector2(73 * 2, (Graphics::GetViewportHeight() - 200)), new Rect(0.0f, 7 * 1024.0f, 510, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+
+	// rock
+	SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) - (73 * 3 - 30), (Graphics::GetViewportHeight() / 2) - 73 * 3), new Rect(512.0f * (3 + 0), 512.0f * 0, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) - (73 - 30), (Graphics::GetViewportHeight() / 2) - 73 * 3), new Rect(512.0f * (3 + 1), 512.0f * 0, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+
+	SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) - (73 * 3 - 30), (Graphics::GetViewportHeight() / 2) - 73 * 1), new Rect(512.0f * (3 + 0), 512.0f * 1, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) - (73 - 30), (Graphics::GetViewportHeight() / 2) - 73 * 1), new Rect(512.0f * (3 + 1), 512.0f * 1, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
+	SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) + (73 + 30), (Graphics::GetViewportHeight() / 2) - 73 * 1), new Rect(512.0f * 5, 512.0f * 1, 256, 450), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 }
 
 void Pacman::Jump(int elapsedTime)
@@ -454,4 +461,7 @@ int Pacman::random(int min, int max) //range : [min, max]
 
 void Pacman::AudioHanlder()
 {
+	music = new SoundEffect(true, 1.0f, 0.2f);
+	music->Load("Audio/BG_Music.wav");
+	Audio::Play(music);
 }
