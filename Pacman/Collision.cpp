@@ -39,7 +39,7 @@ void Collision::UpdateCollision(Collision &other)
 	{
 		cout << "top right" << endl;
 		OverlapSize->X += other.Rect->X - (Rect->X + Rect->Width); // Top Right Collision
-		OverlapSize->Y += other.Rect->Y - (Rect->Y + Rect->Height); // Top Right Collision
+		OverlapSize->Y += other.Rect->Y - (Rect->Y + Rect->Height); 
 	}
 	else if (Rect->X + Rect->Width >= other.Rect->X &&
 		Rect->X + Rect->Width < other.Rect->X + other.Rect->Width &&
@@ -58,8 +58,6 @@ void Collision::UpdateCollision(Collision &other)
 		cout << "bottom right" << endl;
 		OverlapSize->X += other.Rect->X - (Rect->X + Rect->Width); // Bottom Right Collision
 		OverlapSize->Y += Rect->Y - (other.Rect->Y + other.Rect->Height); 
-
-		//OverlapSize = new Vector2(other.Rect->X, other.Rect->Y); // Bottom Right Collision
 	}
 	else if (other.Rect->X >= Rect->X &&
 		other.Rect->X < Rect->X + Rect->Width &&
@@ -69,7 +67,5 @@ void Collision::UpdateCollision(Collision &other)
 		cout << "top left" << endl;
 		OverlapSize->X += Rect->X - (other.Rect->X + other.Rect->Width); // Top Left Collision
 		OverlapSize->Y += other.Rect->Y - (Rect->Y + Rect->Height); 
-
-		//OverlapSize = new Vector2(other.Rect->X + other.Rect->Width, other.Rect->Y + other.Rect->Height); // Top Left Collision
 	}
 }
