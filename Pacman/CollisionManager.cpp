@@ -31,3 +31,18 @@ void CollisionManager::Update(int elapsedTime)
 		}
 	}
 }
+
+bool CollisionManager::IsCollider(Vector2 point)
+{
+	for (int j = 0; j < Collisions->size(); j++)
+	{
+		if ((*Collisions)[j]->Type == Collision::CollisionType::Static)
+		{
+			if (point.X >= (*Collisions)[j]->Rect->X && point.X < (*Collisions)[j]->Rect->X + (*Collisions)[j]->Rect->Width &&
+				point.Y >= (*Collisions)[j]->Rect->Y && point.Y < (*Collisions)[j]->Rect->Y + (*Collisions)[j]->Rect->Height)
+				return true;
+		}
+	}
+
+	return false;
+}

@@ -7,7 +7,7 @@ AIAgent::AIAgent()
 
 	velocity = new Vector2();
 	PrevPosition = new Vector2();
-	rect = new Rect(650, 500, 158, 128);
+	rect = new Rect(1300, 500, 158, 100);
 	collision->Rect = rect;
 
 }
@@ -21,7 +21,8 @@ AIAgent::~AIAgent()
 }
 
 void AIAgent::UpdateAI(int elapsedTime)
-{
+{ 
+	bool wasOverlapping = false;
 	PrevPosition->X = rect->X;
 	PrevPosition->Y = rect->Y;
 
@@ -33,24 +34,45 @@ void AIAgent::UpdateAI(int elapsedTime)
 	collision->Rect->Y = rect->Y;
 	if (abs(collision->OverlapSize->X) > 0.0f || abs(collision->OverlapSize->Y) > 0.0f)
 	{
-		rect->Y = PrevPosition->Y - 0.01f;
-
-
-		collision->OverlapSize->X = 0;
-
-		collision->OverlapSize->Y = 0;
-
-		velocity->Y = 0;
 		CurrentState = AIState::Grounded;
+
+		if (abs(collision->OverlapSize->X) > 0.0f)
+			wasOverlapping = true;
+
+		if (abs(collision->OverlapSize->X) >= collision->Rect->Width)
+		{
+			while (CollisionManager::Instance->IsCollider(Vector2(rect->X, rect->Y + rect->Height)) ||
+				CollisionManager::Instance->IsCollider(Vector2(rect->X + rect->Width, rect->Y + rect->Height)))
+			{
+				rect->Y--;
+				velocity->Y = 0;
+				collision->Rect->X = rect->X;
+				collision->Rect->Y = rect->Y;
+			}
+		}
+
+		while (CollisionManager::Instance->IsCollider(Vector2(rect->X, rect->Y + 1.0f)) ||
+			CollisionManager::Instance->IsCollider(Vector2(rect->X + rect->Width, rect->Y + 1.0f)))
+		{
+			rect->Y++;
+			velocity->Y = 0;
+			collision->Rect->X = rect->X;
+			collision->Rect->Y = rect->Y;
+		}
+
 	}
-	else
+
+	if (!CollisionManager::Instance->IsCollider(Vector2(rect->X, rect->Y + rect->Height + 1.0f)) &&
+		!CollisionManager::Instance->IsCollider(Vector2(rect->X + rect->Width, rect->Y + rect->Height + 1.0f)))
 	{
 		CurrentState = AIState::InAir;
-
-		velocity->Y += 0.1f; //Gravity
+		velocity->Y += 0.1f;
 	}
-	
-	if (CurrentState == AIState::Grounded)
+	else
+		velocity->Y = 0;
+
+	cout << "distance: " << abs(rect->X - Pacman::Instance->_pacmanPosition->X) << endl;
+	if (CurrentState == AIState::Grounded && abs(rect->X - Pacman::Instance->_pacmanPosition->X) < 500.0f)
 		rect->X = MathHelper::Lerp(rect->X, Pacman::Instance->_pacmanPosition->X, 0.1f);
 
 }

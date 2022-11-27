@@ -19,6 +19,7 @@ public:
 	Vector2* PrevPosition;
 	Collision* collision;
 	Rect* rect;
+	
 
 	void UpdateAI(int elapsedTime);
 	void DrawAI(AnimationSequence* sequence);

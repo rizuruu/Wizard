@@ -30,14 +30,14 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 
 	gameObjectA = new Collision(Collision::CollisionType::Dynamic);
 	gameObjectA->Rect->Width = 100.0f;
-	gameObjectA->Rect->Height = 300.0f;
+	gameObjectA->Rect->Height = 170.0f;
 	gameObjectA->Rect->X = 1920/2;
 	gameObjectA->Rect->Y = 1080/2;
 	
 
 	gameObjectB = new Collision(Collision::CollisionType::Static);
 	gameObjectB->Rect->Width = 1920;
-	gameObjectB->Rect->Height = 73*1;
+	gameObjectB->Rect->Height = 1000;
 
 	gameObjectC = new Collision(Collision::CollisionType::Static);
 	gameObjectC->Rect->Width = 73*5;
@@ -61,7 +61,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.3f), 
 
 	//Initialise important Game aspects
 	S2D::Audio::Initialise();
-	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, true, 25, 25, "Pacman", 60);
+	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, false, 25, 25, "Wizard", 60);
 	Input::Initialise();
 	Graphics::StartGameLoop();
 }
@@ -89,6 +89,7 @@ void Pacman::LoadContent()
 	FlowerAnimator = new AnimationSequence();
 	WindPlantAnimator = new AnimationSequence();
 	GreenSlimeAnimator = new AnimationSequence();
+	OrbAnimator = new AnimationSequence();
 	// Load Pacman
 	_pacmanTexture = new Texture2D();
 	_RunTexture = new Texture2D();
@@ -101,6 +102,7 @@ void Pacman::LoadContent()
 	WindPlant = new Texture2D();
 	BGTexture = new Texture2D();
 	GreenSlime = new Texture2D();
+	Orb = new Texture2D();
 	_pacmanTexture->Load("Textures/PlayerIdle.png", false);
 	Platform->Load("Textures/Platform.png", false);
 	Flower->Load("Textures/Flower.png", false);
@@ -112,6 +114,7 @@ void Pacman::LoadContent()
 	VegetationA->Load("Textures/VegetationA.png", false);
 	BGTexture->Load("Textures/BG.png", false);
 	GreenSlime->Load("Textures/GreenSlime.png", false);
+	Orb->Load("Textures/Orb.png", false);
 	_pacmanPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	_pacmanPrevPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	_JumpPosition = new Vector2(_pacmanPosition->X, _pacmanPosition->Y - 80);
@@ -161,6 +164,7 @@ void Pacman::InitializeSequences()
 	FlowerAnimator->Initialize(Flower, 60, FlowerFramesVector, 768, 768);
 	WindPlantAnimator->Initialize(WindPlant, 30, new Vector2(6, 5), 512, 512);
 	GreenSlimeAnimator->Initialize(GreenSlime, 30, new Vector2(5, 6), 376, 256);
+	OrbAnimator->Initialize(Orb, 30, new Vector2(5, 6), 480, 480);
 }
 
 void Pacman::Update(int elapsedTime)
@@ -173,46 +177,7 @@ void Pacman::Update(int elapsedTime)
 	_pacmanPosition->Y += Velocity->Y * elapsedTime;
 
 	gameObjectA->Rect->X = _pacmanPosition->X + 150;
-	gameObjectA->Rect->Y = _pacmanPosition->Y;
-
-	gameObjectB->Rect->X = 0;
-	gameObjectB->Rect->Y = Graphics::GetViewportHeight() - 73;
-
-	gameObjectC->Rect->X = Graphics::GetViewportWidth() - (5 * 73 - 20);
-	gameObjectC->Rect->Y = (Graphics::GetViewportHeight() - 200);
-
-	collisionManager->Update(elapsedTime);
-
-	if (abs(gameObjectA->OverlapSize->X) > 0.0f || abs(gameObjectA->OverlapSize->Y) > 0.0f)
-	{
-		_pacmanPosition->Y = _pacmanPrevPosition->Y;
-
-		_pacmanPosition->X = _pacmanPrevPosition->X;
-		gameObjectA->OverlapSize->X = 0;
-
-		gameObjectA->OverlapSize->Y = 0;
-		
-		Velocity->Y = 0;
-
-		if (Velocity->X == 0)
-			PState = PlayerState::Idle;
-
-	}
-	else 
-	{
-		PState = PlayerState::Jumping;
-		Velocity->Y += Gravity;
-	}
-
-	InputHandler(elapsedTime);
-	_pacmanPrevPosition->X = _pacmanPosition->X;
-	_pacmanPrevPosition->Y = _pacmanPosition->Y;
-	_pacmanPosition->X += Velocity->X * elapsedTime;
-
-	_pacmanPosition->Y += Velocity->Y * elapsedTime;
-
-	gameObjectA->Rect->X = _pacmanPosition->X + 150;
-	gameObjectA->Rect->Y = _pacmanPosition->Y;
+	gameObjectA->Rect->Y = _pacmanPosition->Y + 130;
 
 	gameObjectB->Rect->X = 0;
 	gameObjectB->Rect->Y = Graphics::GetViewportHeight() - 73;
@@ -223,34 +188,52 @@ void Pacman::Update(int elapsedTime)
 	PlatformCollider->Rect->X = (Graphics::GetViewportWidth() / 2) - (73 * 2);
 	PlatformCollider->Rect->Y = (Graphics::GetViewportHeight() / 2);
 
-
 	collisionManager->Update(elapsedTime);
 	Enemy->UpdateAI(elapsedTime);
 
-
 	if (abs(gameObjectA->OverlapSize->X) > 0.0f || abs(gameObjectA->OverlapSize->Y) > 0.0f)
 	{
-		_pacmanPosition->Y = _pacmanPrevPosition->Y;
+		cout << abs(gameObjectA->OverlapSize->Y) << endl;
+		if (abs(gameObjectA->OverlapSize->X) >= gameObjectA->Rect->Width)
+		{
+			while (collisionManager->IsCollider(Vector2(gameObjectA->Rect->X, gameObjectA->Rect->Y + gameObjectA->Rect->Height)) ||
+				collisionManager->IsCollider(Vector2(gameObjectA->Rect->X + gameObjectA->Rect->Width, gameObjectA->Rect->Y + gameObjectA->Rect->Height)))
+			{
+				_pacmanPosition->Y--;
+				Velocity->Y = 0;
+				gameObjectA->Rect->X = _pacmanPosition->X + 150;
+				gameObjectA->Rect->Y = _pacmanPosition->Y + 130;
+			}
+
+		}
+
+		while (collisionManager->IsCollider(Vector2(gameObjectA->Rect->X, gameObjectA->Rect->Y + 1.0f)) ||
+			collisionManager->IsCollider(Vector2(gameObjectA->Rect->X + gameObjectA->Rect->Width, gameObjectA->Rect->Y + 1.0f)))
+		{
+			_pacmanPosition->Y++;
+			Velocity->Y = 0;
+			gameObjectA->Rect->X = _pacmanPosition->X + 150;
+			gameObjectA->Rect->Y = _pacmanPosition->Y + 130;
+		}
 
 		_pacmanPosition->X = _pacmanPrevPosition->X;
 		gameObjectA->OverlapSize->X = 0;
 
 		gameObjectA->OverlapSize->Y = 0;
-
-		Velocity->Y = 0;
-
+		
 		if (Velocity->X == 0)
 			PState = PlayerState::Idle;
 
 	}
-	else
+
+	if (!collisionManager->IsCollider(Vector2(gameObjectA->Rect->X, gameObjectA->Rect->Y + gameObjectA->Rect->Height + 1.0f)) &&
+		!collisionManager->IsCollider(Vector2(gameObjectA->Rect->X + gameObjectA->Rect->Width, gameObjectA->Rect->Y + gameObjectA->Rect->Height + 1.0f)))
 	{
-		if (Velocity->Y != 0)
-		{
-			PState = PlayerState::Jumping;
-		}
-			Velocity->Y += Gravity;
+		PState = PlayerState::Jumping;
+		Velocity->Y += Gravity;
 	}
+	else
+		Velocity->Y = 0;
 }
 
 void Pacman::Draw(int elapsedTime)
@@ -401,6 +384,7 @@ void Pacman::DrawEnvironmentFront(int elapsedTime)
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) - 73, (Graphics::GetViewportHeight() / 2)), new Rect(1 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(2 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	
+	OrbAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f - 200, (Graphics::GetViewportHeight() - 280)), false, 0.3f);
 
 	//SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(512.0f * 4, 512.0f * 0, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	//SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(512.0f * 5, 512.0f * 0, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
@@ -430,10 +414,11 @@ void Pacman::DrawEnvironmentBack(int elapsedTime)
 
 void Pacman::Jump(int elapsedTime)
 {
-	if (_pacmanPosition->Y == _pacmanPrevPosition->Y)
+	if (collisionManager->IsCollider(Vector2(gameObjectA->Rect->X, gameObjectA->Rect->Y + gameObjectA->Rect->Height + 1.0f)) ||
+		collisionManager->IsCollider(Vector2(gameObjectA->Rect->X + gameObjectA->Rect->Width, gameObjectA->Rect->Y + gameObjectA->Rect->Height + 1.0f)))
 		Velocity->Y = -JumpForce;
-	if (Enemy->rect->Y == Enemy->PrevPosition->Y)
-		Enemy->velocity->Y = -JumpForce;
+	//if (Enemy->rect->Y == Enemy->PrevPosition->Y)
+	//	Enemy->velocity->Y = -JumpForce;
 }
 
 void Pacman::DrawDebugs(bool draw)

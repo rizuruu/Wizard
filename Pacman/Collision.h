@@ -32,4 +32,5 @@ public:
 
 	void DrawDebug(Color color = Color(1.0f, 1.0f, 1.0f, 0.3f));
 	void UpdateCollision(Collision &other);
+	bool IsInside(Vector2 point);
 };

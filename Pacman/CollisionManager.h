@@ -15,6 +15,7 @@ public:
 	vector<Collision*>* Collisions;
 
 	void Update(int elapsedTime);
+	bool IsCollider(Vector2 point);
 };
 
 #endif // !1

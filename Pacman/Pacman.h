@@ -43,6 +43,7 @@ private:
 	Texture2D* WindPlant;
 	Texture2D* BGTexture;
 	Texture2D* GreenSlime;
+	Texture2D* Orb;
 	Rect* PlayerIdleFrames[24];
 	Rect* PlayerRunFrames[22];
 	Rect* PlayerAttackFrames[21];
@@ -86,13 +87,14 @@ private:
 	AnimationSequence* FlowerAnimator;
 	AnimationSequence* WindPlantAnimator;
 	AnimationSequence* GreenSlimeAnimator;
+	AnimationSequence* OrbAnimator;
 
 	SoundEffect* music;
 	const float _cPacmanSpeed = 0.1f;
 
 	Vector2* Velocity;
-	const float Gravity = 0.1f;
-	float JumpForce = 0.8f;
+	const float Gravity = 0.15f;
+	float JumpForce = 1.0f;
 
 	CollisionManager* collisionManager;
 public:
