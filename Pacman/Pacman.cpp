@@ -275,19 +275,16 @@ void Pacman::InputHandler(int elapsedTime)
 	{
 		if (keyboardState->IsKeyDown(Input::Keys::W))
 		{
-			//_pacmanPosition->Y -= _cPacmanSpeed * elapsedTime;
 			PState = PlayerState::Idle;
 		}
 		else if (keyboardState->IsKeyDown(Input::Keys::A))
 		{
-			//_pacmanPosition->X -= _cPacmanSpeed * elapsedTime;
 			Velocity->X = -_cPacmanSpeed;
 			PState = PlayerState::Running;
 			isFlipped = true;
 		}
 		else if (keyboardState->IsKeyDown(Input::Keys::S))
 		{
-			//_pacmanPosition->Y += _cPacmanSpeed * elapsedTime;
 			PState = PlayerState::Idle;
 		}
 		else if (keyboardState->IsKeyDown(Input::Keys::D))
