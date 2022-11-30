@@ -382,9 +382,6 @@ void Pacman::DrawEnvironmentFront(int elapsedTime)
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(2 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	
 	//OrbAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f - 200, (Graphics::GetViewportHeight() - 280)), false, 0.3f);
-
-	//SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(512.0f * 4, 512.0f * 0, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
-	//SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(512.0f * 5, 512.0f * 0, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 }
 
 void Pacman::DrawEnvironmentBack(int elapsedTime)
@@ -414,8 +411,6 @@ void Pacman::Jump(int elapsedTime)
 	if (collisionManager->IsCollider(Vector2(gameObjectA->Rect->X, gameObjectA->Rect->Y + gameObjectA->Rect->Height + 1.0f)) ||
 		collisionManager->IsCollider(Vector2(gameObjectA->Rect->X + gameObjectA->Rect->Width, gameObjectA->Rect->Y + gameObjectA->Rect->Height + 1.0f)))
 		Velocity->Y = -JumpForce;
-	//if (Enemy->rect->Y == Enemy->PrevPosition->Y)
-	//	Enemy->velocity->Y = -JumpForce;
 }
 
 void Pacman::DrawDebugs(bool draw)
@@ -430,12 +425,12 @@ void Pacman::DrawDebugs(bool draw)
 	}
 }
 
-int Pacman::random(int min, int max) //range : [min, max]
+int Pacman::random(int min, int max) 
 {
 	static bool first = true;
 	if (first)
 	{
-		srand(time(NULL)); //seeding for the first time only!
+		srand(time(NULL));
 		first = false;
 	}
 	return min + rand() % ((max + 1) - min);
