@@ -42,6 +42,7 @@ private:
 	Texture2D* BGTexture;
 	Texture2D* GreenSlime;
 	Texture2D* Orb;
+	Texture2D* BluePotion;
 
 	Texture2D* _menuBackground;
 #pragma endregion
@@ -81,7 +82,9 @@ private:
 	AnimationSequence* OrbAnimator;
 #pragma endregion
 
-	SoundEffect* music;
+#pragma region Audio & Sound FX
+	SoundEffect* BG_Music;
+#pragma endregion
 
 	const float WizardSpeed = 0.1f;
 
@@ -114,6 +117,7 @@ public:
 	void virtual DrawEnvironmentBack(int elapsedTime);
 	void virtual InputHandler(int elapsedTime);
 	void virtual Jump(int elapsedTime);
+	void virtual Dash();
 	void virtual SetupCollisions();
 	int random(int min, int max);
 
@@ -122,9 +126,9 @@ public:
 	void virtual DrawDebugs(bool draw = false);
 
 #pragma region Collisions
-	Collision* gameObjectA;
-	Collision* gameObjectB;
-	Collision* gameObjectC;
+	Collision* PlayerCollider;
+	Collision* GroundCollider;
+	Collision* EdgePlatformCollider;
 	Collision* PlatformCollider;
 #pragma endregion
 
@@ -138,10 +142,18 @@ public:
 		Running,
 		Jumping,
 		Attacking,
+	};	
+	
+	enum class GameState
+	{
+		Menu,
+		Game,
 	};
 	
 	PlayerState PState = PlayerState::Idle;
+	GameState CurrentGameState = GameState::Menu;
 
 	Vector2* WizardPosition;
+	float* Health;
 };
 #endif

@@ -43,11 +43,17 @@ Pacman::~Pacman()
 {
 	delete WizardTexture_Idle;
 	delete WizardRect;
+	delete WizardPosition;
+	delete Instance;
 
-	delete gameObjectA;
-	delete gameObjectB;
-	delete gameObjectC;
+	delete PlayerCollider;
+	delete GroundCollider;
+	delete EdgePlatformCollider;
 	delete PlatformCollider;
+
+	delete Enemy;
+	delete Velocity;
+	delete BG_Music;
 }
 
 void Pacman::LoadContent()
@@ -73,6 +79,7 @@ void Pacman::LoadContent()
 	BGTexture = new Texture2D();
 	GreenSlime = new Texture2D();
 	Orb = new Texture2D();
+	BluePotion = new Texture2D();
 	WizardTexture_Idle->Load("Textures/PlayerIdle.png", false);
 	Platform->Load("Textures/Platform.png", false);
 	Flower->Load("Textures/Flower.png", false);
@@ -85,6 +92,7 @@ void Pacman::LoadContent()
 	BGTexture->Load("Textures/BG.png", false);
 	GreenSlime->Load("Textures/GreenSlime.png", false);
 	Orb->Load("Textures/Orb.png", false);
+	BluePotion->Load("Textures/BluePotion.png", false);
 	WizardPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	WizardPrevPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	Velocity = new Vector2(0.0f, 0.0f);
@@ -138,14 +146,14 @@ void Pacman::Update(int elapsedTime)
 
 	WizardPosition->Y += Velocity->Y * elapsedTime;
 
-	gameObjectA->Rect->X = WizardPosition->X + 150;
-	gameObjectA->Rect->Y = WizardPosition->Y + 130;
+	PlayerCollider->Rect->X = WizardPosition->X + 150;
+	PlayerCollider->Rect->Y = WizardPosition->Y + 130;
 
-	gameObjectB->Rect->X = 0;
-	gameObjectB->Rect->Y = Graphics::GetViewportHeight() - 73;
+	GroundCollider->Rect->X = 0;
+	GroundCollider->Rect->Y = Graphics::GetViewportHeight() - 73;
 
-	gameObjectC->Rect->X = Graphics::GetViewportWidth() - (5 * 73 - 20);
-	gameObjectC->Rect->Y = (Graphics::GetViewportHeight() - 200);
+	EdgePlatformCollider->Rect->X = Graphics::GetViewportWidth() - (5 * 73 - 20);
+	EdgePlatformCollider->Rect->Y = (Graphics::GetViewportHeight() - 200);
 
 	PlatformCollider->Rect->X = (Graphics::GetViewportWidth() / 2) - (73 * 2);
 	PlatformCollider->Rect->Y = (Graphics::GetViewportHeight() / 2);
@@ -153,43 +161,43 @@ void Pacman::Update(int elapsedTime)
 	collisionManager->Update(elapsedTime);
 	Enemy->UpdateAI(elapsedTime);
 
-	if (abs(gameObjectA->OverlapSize->X) > 0.0f || abs(gameObjectA->OverlapSize->Y) > 0.0f)
+	if (abs(PlayerCollider->OverlapSize->X) > 0.0f || abs(PlayerCollider->OverlapSize->Y) > 0.0f)
 	{
-		cout << abs(gameObjectA->OverlapSize->Y) << endl;
-		if (abs(gameObjectA->OverlapSize->X) >= gameObjectA->Rect->Width)
+		cout << abs(PlayerCollider->OverlapSize->Y) << endl;
+		if (abs(PlayerCollider->OverlapSize->X) >= PlayerCollider->Rect->Width)
 		{
-			while (collisionManager->IsCollider(Vector2(gameObjectA->Rect->X, gameObjectA->Rect->Y + gameObjectA->Rect->Height)) ||
-				collisionManager->IsCollider(Vector2(gameObjectA->Rect->X + gameObjectA->Rect->Width, gameObjectA->Rect->Y + gameObjectA->Rect->Height)))
+			while (collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X, PlayerCollider->Rect->Y + PlayerCollider->Rect->Height)) ||
+				collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X + PlayerCollider->Rect->Width, PlayerCollider->Rect->Y + PlayerCollider->Rect->Height)))
 			{
 				WizardPosition->Y--;
 				Velocity->Y = 0;
-				gameObjectA->Rect->X = WizardPosition->X + 150;
-				gameObjectA->Rect->Y = WizardPosition->Y + 130;
+				PlayerCollider->Rect->X = WizardPosition->X + 150;
+				PlayerCollider->Rect->Y = WizardPosition->Y + 130;
 			}
 
 		}
 
-		while (collisionManager->IsCollider(Vector2(gameObjectA->Rect->X, gameObjectA->Rect->Y + 1.0f)) ||
-			collisionManager->IsCollider(Vector2(gameObjectA->Rect->X + gameObjectA->Rect->Width, gameObjectA->Rect->Y + 1.0f)))
+		while (collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X, PlayerCollider->Rect->Y + 1.0f)) ||
+			collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X + PlayerCollider->Rect->Width, PlayerCollider->Rect->Y + 1.0f)))
 		{
 			WizardPosition->Y++;
 			Velocity->Y = 0;
-			gameObjectA->Rect->X = WizardPosition->X + 150;
-			gameObjectA->Rect->Y = WizardPosition->Y + 130;
+			PlayerCollider->Rect->X = WizardPosition->X + 150;
+			PlayerCollider->Rect->Y = WizardPosition->Y + 130;
 		}
 
 		WizardPosition->X = WizardPrevPosition->X;
-		gameObjectA->OverlapSize->X = 0;
+		PlayerCollider->OverlapSize->X = 0;
 
-		gameObjectA->OverlapSize->Y = 0;
+		PlayerCollider->OverlapSize->Y = 0;
 		
 		if (Velocity->X == 0)
 			PState = PlayerState::Idle;
 
 	}
 
-	if (!collisionManager->IsCollider(Vector2(gameObjectA->Rect->X, gameObjectA->Rect->Y + gameObjectA->Rect->Height + 1.0f)) &&
-		!collisionManager->IsCollider(Vector2(gameObjectA->Rect->X + gameObjectA->Rect->Width, gameObjectA->Rect->Y + gameObjectA->Rect->Height + 1.0f)))
+	if (!collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X, PlayerCollider->Rect->Y + PlayerCollider->Rect->Height + 1.0f)) &&
+		!collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X + PlayerCollider->Rect->Width, PlayerCollider->Rect->Y + PlayerCollider->Rect->Height + 1.0f)))
 	{
 		PState = PlayerState::Jumping;
 		Velocity->Y += Gravity;
@@ -204,8 +212,20 @@ void Pacman::Draw(int elapsedTime)
 	stream << "Player X: " << WizardPosition->X << " Y: " << WizardPosition->Y << " Velocity X: " << Velocity->X << " Velocity Y: " << Velocity->Y << " Enemy X: " << Enemy->velocity->X << " Y: " << Enemy->velocity->Y;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
+
+	switch (CurrentGameState)
+	{
+	case Pacman::GameState::Menu:
+		break;
+	case Pacman::GameState::Game:
+		break;
+	default:
+		break;
+	}
+
 	DrawEnvironmentBack(elapsedTime);
 	SpriteBatch::DrawRectangle(new Rect(0, 0, 1920, 1080), new Color(0.0f, 0.341f, 0.416f, 0.5f)); //0.443, 0.761, 0.788
+
 
 	if (_paused)
 	{
@@ -224,6 +244,8 @@ void Pacman::Draw(int elapsedTime)
 
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
+	SpriteBatch::DrawRectangle(new Rect(25, 30, 250, 20), new Color(0.0f, 1.f, 0.0f, 0.8f)); //0.443, 0.761, 0.788
+
 	SpriteBatch::EndDraw(); // Ends Drawing
 }
 
@@ -266,6 +288,10 @@ void Pacman::InputHandler(int elapsedTime)
 			Jump(elapsedTime);
 		}
 
+		if (keyboardState->IsKeyDown(Input::Keys::LEFTSHIFT))
+		{
+			Dash();
+		}
 
 		if (WizardPosition->X > Graphics::GetViewportWidth())
 		{
@@ -345,6 +371,8 @@ void Pacman::DrawEnvironmentFront(int elapsedTime)
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) - 73, (Graphics::GetViewportHeight() / 2)), new Rect(1 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(2 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	
+	SpriteBatch::Draw(BluePotion, new Vector2((Graphics::GetViewportWidth() / 2), (Graphics::GetViewportHeight() - 150)), new Rect(128.0f, 128.0f, 128.0f, 128.0f), Vector2::Zero, 0.5f, 0.0f, Color::White, SpriteEffect::NONE);
+	
 	//OrbAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f - 200, (Graphics::GetViewportHeight() - 280)), false, 0.3f);
 }
 
@@ -372,29 +400,37 @@ void Pacman::DrawEnvironmentBack(int elapsedTime)
 
 void Pacman::Jump(int elapsedTime)
 {
-	if (collisionManager->IsCollider(Vector2(gameObjectA->Rect->X, gameObjectA->Rect->Y + gameObjectA->Rect->Height + 1.0f)) ||
-		collisionManager->IsCollider(Vector2(gameObjectA->Rect->X + gameObjectA->Rect->Width, gameObjectA->Rect->Y + gameObjectA->Rect->Height + 1.0f)))
+	if (collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X, PlayerCollider->Rect->Y + PlayerCollider->Rect->Height + 1.0f)) ||
+		collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X + PlayerCollider->Rect->Width, PlayerCollider->Rect->Y + PlayerCollider->Rect->Height + 1.0f)))
 		Velocity->Y = -JumpForce;
+}
+
+void Pacman::Dash()
+{
+	if (isFlipped)
+		Velocity->X = -MathHelper::Lerp(0.0f, 2.5f, 0.4);
+	else
+		Velocity->X = MathHelper::Lerp(0.0f, 2.5f, 0.4);
 }
 
 void Pacman::SetupCollisions()
 {
-	gameObjectA = new Collision(Collision::CollisionType::Dynamic);
-	gameObjectA->Rect->Width = 100.0f;
-	gameObjectA->Rect->Height = 170.0f;
-	gameObjectA->Rect->X = 1920 / 2;
-	gameObjectA->Rect->Y = 1080 / 2;
+	PlayerCollider = new Collision(Collision::CollisionType::Dynamic);
+	PlayerCollider->Rect->Width = 100.0f;
+	PlayerCollider->Rect->Height = 170.0f;
+	PlayerCollider->Rect->X = 1920 / 2;
+	PlayerCollider->Rect->Y = 1080 / 2;
 
 
-	gameObjectB = new Collision(Collision::CollisionType::Static);
-	gameObjectB->Rect->Width = 1920;
-	gameObjectB->Rect->Height = 1000;
+	GroundCollider = new Collision(Collision::CollisionType::Static);
+	GroundCollider->Rect->Width = 1920;
+	GroundCollider->Rect->Height = 1000;
 
-	gameObjectC = new Collision(Collision::CollisionType::Static);
-	gameObjectC->Rect->Width = 73 * 5;
-	gameObjectC->Rect->Height = 73 * 2;
-	gameObjectC->Rect->X = 1600;
-	gameObjectC->Rect->Y = 0;
+	EdgePlatformCollider = new Collision(Collision::CollisionType::Static);
+	EdgePlatformCollider->Rect->Width = 73 * 5;
+	EdgePlatformCollider->Rect->Height = 73 * 2;
+	EdgePlatformCollider->Rect->X = 1600;
+	EdgePlatformCollider->Rect->Y = 0;
 
 	PlatformCollider = new Collision(Collision::CollisionType::Static);
 	PlatformCollider->Rect->Height = 73 * 2;
@@ -405,9 +441,9 @@ void Pacman::DrawDebugs(bool draw)
 {
 	if (draw)
 	{
-		gameObjectA->DrawDebug();
-		gameObjectB->DrawDebug(Color(1.0f, 0.0f, 0.0f, 0.3f));
-		gameObjectC->DrawDebug(Color(0.0f, 1.0f, 0.0f, 0.3f));
+		PlayerCollider->DrawDebug();
+		GroundCollider->DrawDebug(Color(1.0f, 0.0f, 0.0f, 0.3f));
+		EdgePlatformCollider->DrawDebug(Color(0.0f, 1.0f, 0.0f, 0.3f));
 		PlatformCollider->DrawDebug(Color(0.0f, 1.0f, 0.0f, 0.3f));
 		Enemy->collision->DrawDebug(Color(1.0f, 0.0f, 0.0f, 0.3f));
 	}
@@ -426,7 +462,7 @@ int Pacman::random(int min, int max)
 
 void Pacman::AudioHanlder()
 {
-	music = new SoundEffect(true, 1.0f, 0.2f);
-	music->Load("Audio/BG_Music.wav");
-	Audio::Play(music);
+	BG_Music = new SoundEffect(true, 1.0f, 0.2f);
+	BG_Music->Load("Audio/BG_Music.wav");
+	Audio::Play(BG_Music);
 }
