@@ -8,7 +8,7 @@ class Sequence
 public:
 	Texture2D* Source;
 	int FramesCount;
-	Vector2* grid;
+	Vector2 grid;
 	int width;
 	int height;
 };

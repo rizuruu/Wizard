@@ -71,9 +71,9 @@ void AIAgent::UpdateAI(int elapsedTime)
 	else
 		velocity->Y = 0;
 
-	cout << "distance: " << abs(rect->X - Pacman::Instance->_pacmanPosition->X) << endl;
-	if (CurrentState == AIState::Grounded && abs(rect->X - Pacman::Instance->_pacmanPosition->X) < 500.0f)
-		rect->X = MathHelper::Lerp(rect->X, Pacman::Instance->_pacmanPosition->X, 0.1f);
+	cout << "distance: " << abs(rect->X - Pacman::Instance->WizardPosition->X) << endl;
+	if (CurrentState == AIState::Grounded && abs(rect->X - Pacman::Instance->WizardPosition->X) < 500.0f)
+		rect->X = MathHelper::Lerp(rect->X, Pacman::Instance->WizardPosition->X, 0.1f);
 
 }
 

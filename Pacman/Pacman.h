@@ -29,12 +29,10 @@ class Pacman : public Game
 {
 private:
 	// Data to represent Pacman
-	Vector2* _pacmanPrevPosition;
-	Vector2* _JumpPosition;
-	Rect* _pacmanSourceRect;
-	Texture2D* _pacmanTexture;
-	Texture2D* _RunTexture;
-	Texture2D* _JumpTexture;
+#pragma region Textures
+	Texture2D* WizardTexture_Idle;
+	Texture2D* WizardTexture_Run;
+	Texture2D* WizardTexture_Jump;
 	Texture2D* _AttackTexture;
 	Texture2D* Platform;
 	Texture2D* Flower;
@@ -44,42 +42,35 @@ private:
 	Texture2D* BGTexture;
 	Texture2D* GreenSlime;
 	Texture2D* Orb;
-	Rect* PlayerIdleFrames[24];
-	Rect* PlayerRunFrames[22];
-	Rect* PlayerAttackFrames[21];
+
+	Texture2D* _menuBackground;
+#pragma endregion
+
+	Vector2* WizardPrevPosition;
+	Rect* WizardRect;
 	Rect* Tile_Rect;
 	Rect* Tile_Rect2;
-	
-	// Data to represent Munchie
-	int _frameCount;
-	Rect* _munchieRect;
-	Texture2D* _munchieBlueTexture;
-	Texture2D* _munchieInvertedTexture;
-
-	// Position for String
-	Vector2* _stringPosition;
-
 	// Data for Menu
-	Texture2D* _menuBackground; 
-	Rect* _menuRectangle; 
+	Rect* _menuRectangle;
+	// Position for String
+
+	Vector2* _stringPosition;
 	Vector2* _menuStringPosition; 
+
 	bool _paused;
 	bool _pKeyDown;
 	bool isFlipped;
-	bool hasJumped;
+	bool _drawDebug;
 
-	int _pacmanFrame;
-	int _pacmanCurrentFrameTime;
-	const int _cPacmanFrameTime;
-
-	Vector2* IdleFramesVector;
+#pragma region Sprite Grid Vectors
+	Vector2 IdleFramesVector;
 	Vector2 RunFramesVector;
-	Vector2* JumpFramesVector;
-	Vector2* AttackFramesVector;
-	Vector2* FlowerFramesVector;
-	int CurrentFrame;
-	int Acc;
+	Vector2 JumpFramesVector;
+	Vector2 AttackFramesVector;
+	Vector2 FlowerFramesVector;
+#pragma endregion
 
+#pragma region Animation Sequences
 	AnimationSequence* IdleAnimator;
 	AnimationSequence* RunAnimator;
 	AnimationSequence* JumpAnimator;
@@ -88,9 +79,11 @@ private:
 	AnimationSequence* WindPlantAnimator;
 	AnimationSequence* GreenSlimeAnimator;
 	AnimationSequence* OrbAnimator;
+#pragma endregion
 
 	SoundEffect* music;
-	const float _cPacmanSpeed = 0.1f;
+
+	const float WizardSpeed = 0.1f;
 
 	Vector2* Velocity;
 	const float Gravity = 0.15f;
@@ -121,19 +114,23 @@ public:
 	void virtual DrawEnvironmentBack(int elapsedTime);
 	void virtual InputHandler(int elapsedTime);
 	void virtual Jump(int elapsedTime);
+	void virtual SetupCollisions();
 	int random(int min, int max);
 
 	void virtual AudioHanlder();
 
 	void virtual DrawDebugs(bool draw = false);
 
+#pragma region Collisions
 	Collision* gameObjectA;
 	Collision* gameObjectB;
 	Collision* gameObjectC;
 	Collision* PlatformCollider;
+#pragma endregion
 
+#pragma region AI Agents
 	AIAgent* Enemy;
-	Vector2* _pacmanPosition;
+#pragma endregion
 
 	enum class PlayerState
 	{
@@ -144,5 +141,7 @@ public:
 	};
 	
 	PlayerState PState = PlayerState::Idle;
+
+	Vector2* WizardPosition;
 };
 #endif

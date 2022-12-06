@@ -28,7 +28,7 @@ public:
 	/// <param name="grid">Grid vector of sprite sheet</param>
 	/// <param name="width">Width of individual frame</param>
 	/// <param name="height">Height of Individual Frame</param>
-	void virtual Initialize(Texture2D* Source, int FramesCount, Vector2* grid, int width, int height);
+	void virtual Initialize(Texture2D* Source, int FramesCount, Vector2 grid, int width, int height);
 	void virtual Initialize(Sequence sequence);
 
 	/// <summary>

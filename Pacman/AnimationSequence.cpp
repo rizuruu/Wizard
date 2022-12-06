@@ -7,11 +7,11 @@ AnimationSequence::AnimationSequence()
 
 }
 
-void AnimationSequence::Initialize(Texture2D* Source, int Frames, Vector2* grid, int width, int height)
+void AnimationSequence::Initialize(Texture2D* Source, int Frames, Vector2 grid, int width, int height)
 {
 	SourceTexture = Source;
 	FramesCount = Frames;
-	v_FramesCount = grid;
+	v_FramesCount = &grid;
 
 	for (int i = 0; i < v_FramesCount->Y; i++)
 	{
@@ -26,7 +26,7 @@ void AnimationSequence::Initialize(Sequence sequence)
 {
 	SourceTexture = sequence.Source;
 	FramesCount = sequence.FramesCount;
-	v_FramesCount = sequence.grid;
+	v_FramesCount = &sequence.grid;
 
 	for (int i = 0; i < v_FramesCount->Y; i++)
 	{
