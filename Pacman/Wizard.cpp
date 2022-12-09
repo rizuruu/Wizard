@@ -1,4 +1,4 @@
-#include "Pacman.h"
+#include "Wizard.h"
 #include "AnimationSequence.h"
 #include <vector>
 #include <chrono>
@@ -10,11 +10,11 @@
 #include <cstdlib>
 #include "Collision.h"
 using namespace std;
-Pacman* Pacman::Instance = NULL;
+Wizard* Wizard::Instance = NULL;
 
-Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), WizardSpeed(0.3f)
+Wizard::Wizard(int argc, char* argv[]) : Game(argc, argv), WizardSpeed(0.3f)
 {
-	Pacman::Instance = this;
+	Wizard::Instance = this;
 	collisionManager = new CollisionManager();
 	SetupCollisions();
 
@@ -39,7 +39,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), WizardSpeed(0.3f)
 	Graphics::StartGameLoop();
 }
 
-Pacman::~Pacman()
+Wizard::~Wizard()
 {
 	delete WizardTexture_Idle;
 	delete WizardRect;
@@ -56,7 +56,7 @@ Pacman::~Pacman()
 	delete BG_Music;
 }
 
-void Pacman::LoadContent()
+void Wizard::LoadContent()
 {
 	IdleAnimator = new AnimationSequence();
 	RunAnimator = new AnimationSequence();
@@ -117,7 +117,7 @@ void Pacman::LoadContent()
 	_menuStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
 }
 
-void Pacman::InitializeSequences()
+void Wizard::InitializeSequences()
 {
 	Sequence sequence;
 	sequence.FramesCount = 20;
@@ -137,7 +137,7 @@ void Pacman::InitializeSequences()
 	OrbAnimator->Initialize(Orb, 30, Vector2(5, 6), 480, 480);
 }
 
-void Pacman::Update(int elapsedTime)
+void Wizard::Update(int elapsedTime)
 {
 	InputHandler(elapsedTime);
 	WizardPrevPosition->X = WizardPosition->X;
@@ -206,7 +206,7 @@ void Pacman::Update(int elapsedTime)
 		Velocity->Y = 0;
 }
 
-void Pacman::Draw(int elapsedTime)
+void Wizard::Draw(int elapsedTime)
 {
 	std::stringstream stream;
 	stream << "Player X: " << WizardPosition->X << " Y: " << WizardPosition->Y << " Velocity X: " << Velocity->X << " Velocity Y: " << Velocity->Y << " Enemy X: " << Enemy->velocity->X << " Y: " << Enemy->velocity->Y;
@@ -215,9 +215,9 @@ void Pacman::Draw(int elapsedTime)
 
 	switch (CurrentGameState)
 	{
-	case Pacman::GameState::Menu:
+	case Wizard::GameState::Menu:
 		break;
-	case Pacman::GameState::Game:
+	case Wizard::GameState::Game:
 		break;
 	default:
 		break;
@@ -249,7 +249,7 @@ void Pacman::Draw(int elapsedTime)
 	SpriteBatch::EndDraw(); // Ends Drawing
 }
 
-void Pacman::InputHandler(int elapsedTime)
+void Wizard::InputHandler(int elapsedTime)
 {
 	// Gets the current state of the keyboard
 	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
@@ -311,7 +311,7 @@ void Pacman::InputHandler(int elapsedTime)
 		_drawDebug = !_drawDebug;
 }
 
-void Pacman::DrawPlayerAnimation(int elapsedTime)
+void Wizard::DrawPlayerAnimation(int elapsedTime)
 {
 	Sleep(40);
 
@@ -333,7 +333,7 @@ void Pacman::DrawPlayerAnimation(int elapsedTime)
 	}
 }
 
-void Pacman::DrawEnvironmentFront(int elapsedTime)
+void Wizard::DrawEnvironmentFront(int elapsedTime)
 {
 	// Bottom right 
 	for (int i = 1; i < 6; i++)
@@ -376,7 +376,7 @@ void Pacman::DrawEnvironmentFront(int elapsedTime)
 	//OrbAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f - 200, (Graphics::GetViewportHeight() - 280)), false, 0.3f);
 }
 
-void Pacman::DrawEnvironmentBack(int elapsedTime)
+void Wizard::DrawEnvironmentBack(int elapsedTime)
 {
 	SpriteBatch::Draw(BGTexture, new Vector2((Graphics::GetViewportWidth() / 2), (Graphics::GetViewportHeight() / 2)), new Rect(2148.0, 2350.0, 1950.0f, 2048.0f), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 
@@ -398,14 +398,14 @@ void Pacman::DrawEnvironmentBack(int elapsedTime)
 	SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) + (73 + 30), (Graphics::GetViewportHeight() / 2) - 73 * 1), new Rect(512.0f * 5, 512.0f * 1, 256, 450), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 }
 
-void Pacman::Jump(int elapsedTime)
+void Wizard::Jump(int elapsedTime)
 {
 	if (collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X, PlayerCollider->Rect->Y + PlayerCollider->Rect->Height + 1.0f)) ||
 		collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X + PlayerCollider->Rect->Width, PlayerCollider->Rect->Y + PlayerCollider->Rect->Height + 1.0f)))
 		Velocity->Y = -JumpForce;
 }
 
-void Pacman::Dash()
+void Wizard::Dash()
 {
 	if (isFlipped)
 		Velocity->X = -MathHelper::Lerp(0.0f, 2.5f, 0.4);
@@ -413,7 +413,7 @@ void Pacman::Dash()
 		Velocity->X = MathHelper::Lerp(0.0f, 2.5f, 0.4);
 }
 
-void Pacman::SetupCollisions()
+void Wizard::SetupCollisions()
 {
 	PlayerCollider = new Collision(Collision::CollisionType::Dynamic);
 	PlayerCollider->Rect->Width = 100.0f;
@@ -437,7 +437,7 @@ void Pacman::SetupCollisions()
 	PlatformCollider->Rect->Width = 73 * 4;
 }
 
-void Pacman::DrawDebugs(bool draw)
+void Wizard::DrawDebugs(bool draw)
 {
 	if (draw)
 	{
@@ -449,7 +449,7 @@ void Pacman::DrawDebugs(bool draw)
 	}
 }
 
-int Pacman::random(int min, int max) 
+int Wizard::random(int min, int max) 
 {
 	static bool first = true;
 	if (first)
@@ -460,7 +460,7 @@ int Pacman::random(int min, int max)
 	return min + rand() % ((max + 1) - min);
 }
 
-void Pacman::AudioHanlder()
+void Wizard::AudioHanlder()
 {
 	BG_Music = new SoundEffect(true, 1.0f, 0.2f);
 	BG_Music->Load("Audio/BG_Music.wav");

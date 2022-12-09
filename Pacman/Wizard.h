@@ -25,7 +25,7 @@ using namespace S2D;
 #ifndef _player
 #define _player
 
-class Pacman : public Game
+class Wizard : public Game
 {
 private:
 	// Data to represent Pacman
@@ -95,11 +95,11 @@ private:
 	CollisionManager* collisionManager;
 public:
 	/// <summary> Constructs the Pacman class. </summary>
-	Pacman(int argc, char* argv[]);
+	Wizard(int argc, char* argv[]);
 
 	/// <summary> Destroys any data associated with Pacman class. </summary>
-	virtual ~Pacman();
-	static Pacman* Instance;
+	virtual ~Wizard();
+	static Wizard* Instance;
 
 	/// <summary> All content should be loaded in this method. </summary>
 	void virtual LoadContent();
