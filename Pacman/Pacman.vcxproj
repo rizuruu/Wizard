@@ -90,7 +90,7 @@
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Wizard.cpp" />
+    <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Sequence.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -98,7 +98,7 @@
     <ClInclude Include="AnimationSequence.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="CollisionManager.h" />
-    <ClInclude Include="Wizard.h" />
+    <ClInclude Include="GameManager.h" />
     <ClInclude Include="Sequence.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

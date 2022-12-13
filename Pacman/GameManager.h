@@ -25,7 +25,7 @@ using namespace S2D;
 #ifndef _player
 #define _player
 
-class Wizard : public Game
+class GameManager : public Game
 {
 private:
 	// Data to represent Pacman
@@ -91,15 +91,16 @@ private:
 	Vector2* Velocity;
 	const float Gravity = 0.15f;
 	float JumpForce = 1.0f;
+	int MenuSelection = 0;
 
 	CollisionManager* collisionManager;
 public:
 	/// <summary> Constructs the Pacman class. </summary>
-	Wizard(int argc, char* argv[]);
+	GameManager(int argc, char* argv[]);
 
 	/// <summary> Destroys any data associated with Pacman class. </summary>
-	virtual ~Wizard();
-	static Wizard* Instance;
+	virtual ~GameManager();
+	static GameManager* Instance;
 
 	/// <summary> All content should be loaded in this method. </summary>
 	void virtual LoadContent();
@@ -108,15 +109,22 @@ public:
 
 	/// <summary> Called every frame - update game logic here. </summary>
 	void virtual Update(int elapsedTime);
+	void virtual MenuUpdate(int elapsedTime);
+	void virtual GameUpdate(int elapsedTime);
 
 	/// <summary> Called every frame - draw game here. </summary>
 	void virtual Draw(int elapsedTime);
+	void virtual MenuDraw(int elapsedTime);
+	void virtual GameDraw(int elapsedTime);
 
 	void virtual DrawPlayerAnimation(int elapsedTime);
 	void virtual DrawEnvironmentFront(int elapsedTime);
 	void virtual DrawEnvironmentBack(int elapsedTime);
+
 	void virtual InputHandler(int elapsedTime);
-	void virtual Jump(int elapsedTime);
+	void virtual MenuInput(Input::KeyboardState* KState, Input::MouseState* MState);
+	void virtual GameInput(Input::KeyboardState* KState, Input::MouseState* MState);
+	void virtual Jump();
 	void virtual Dash();
 	void virtual SetupCollisions();
 	int random(int min, int max);

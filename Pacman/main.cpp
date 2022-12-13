@@ -1,6 +1,6 @@
-#include "Wizard.h"
+#include "GameManager.h"
 
 //Entry Point for Application
 int main(int argc, char* argv[]) {
-	Wizard* game = new Wizard(argc, argv);
+	GameManager* game = new GameManager(argc, argv);
 }

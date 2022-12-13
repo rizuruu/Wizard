@@ -1,6 +1,6 @@
 #include "AIAgent.h"
 #include <iostream>
-#include "Wizard.h"
+#include "GameManager.h"
 AIAgent::AIAgent()
 {
 	collision = new Collision(Collision::CollisionType::Dynamic);
@@ -71,9 +71,9 @@ void AIAgent::UpdateAI(int elapsedTime)
 	else
 		velocity->Y = 0;
 
-	cout << "distance: " << abs(rect->X - Wizard::Instance->WizardPosition->X) << endl;
-	if (CurrentState == AIState::Grounded && abs(rect->X - Wizard::Instance->WizardPosition->X) < 500.0f)
-		rect->X = MathHelper::Lerp(rect->X, Wizard::Instance->WizardPosition->X, 0.1f);
+	cout << "distance: " << abs(rect->X - GameManager::Instance->WizardPosition->X) << endl;
+	if (CurrentState == AIState::Grounded && abs(rect->X - GameManager::Instance->WizardPosition->X) < 500.0f)
+		rect->X = MathHelper::Lerp(rect->X, GameManager::Instance->WizardPosition->X, 0.1f);
 
 }
 

@@ -1,4 +1,4 @@
-#include "Wizard.h"
+#include "GameManager.h"
 #include "AnimationSequence.h"
 #include <vector>
 #include <chrono>
@@ -10,11 +10,11 @@
 #include <cstdlib>
 #include "Collision.h"
 using namespace std;
-Wizard* Wizard::Instance = NULL;
+GameManager* GameManager::Instance = NULL;
 
-Wizard::Wizard(int argc, char* argv[]) : Game(argc, argv), WizardSpeed(0.3f)
+GameManager::GameManager(int argc, char* argv[]) : Game(argc, argv), WizardSpeed(0.3f)
 {
-	Wizard::Instance = this;
+	GameManager::Instance = this;
 	collisionManager = new CollisionManager();
 	SetupCollisions();
 
@@ -39,7 +39,7 @@ Wizard::Wizard(int argc, char* argv[]) : Game(argc, argv), WizardSpeed(0.3f)
 	Graphics::StartGameLoop();
 }
 
-Wizard::~Wizard()
+GameManager::~GameManager()
 {
 	delete WizardTexture_Idle;
 	delete WizardRect;
@@ -56,7 +56,7 @@ Wizard::~Wizard()
 	delete BG_Music;
 }
 
-void Wizard::LoadContent()
+void GameManager::LoadContent()
 {
 	IdleAnimator = new AnimationSequence();
 	RunAnimator = new AnimationSequence();
@@ -117,7 +117,7 @@ void Wizard::LoadContent()
 	_menuStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
 }
 
-void Wizard::InitializeSequences()
+void GameManager::InitializeSequences()
 {
 	Sequence sequence;
 	sequence.FramesCount = 20;
@@ -137,7 +137,31 @@ void Wizard::InitializeSequences()
 	OrbAnimator->Initialize(Orb, 30, Vector2(5, 6), 480, 480);
 }
 
-void Wizard::Update(int elapsedTime)
+void GameManager::Update(int elapsedTime)
+{
+	InputHandler(elapsedTime);
+	switch (CurrentGameState)
+	{
+		case GameManager::GameState::Menu:
+			MenuUpdate(elapsedTime);
+			break;
+		case GameManager::GameState::Game:
+			GameUpdate(elapsedTime);
+			break;
+		default:
+			break;
+	}
+}
+
+#pragma region Menu Update
+void GameManager::MenuUpdate(int elapsedTime)
+{
+
+}
+#pragma endregion
+
+#pragma region Game Update
+void GameManager::GameUpdate(int elapsedTime)
 {
 	InputHandler(elapsedTime);
 	WizardPrevPosition->X = WizardPosition->X;
@@ -190,7 +214,7 @@ void Wizard::Update(int elapsedTime)
 		PlayerCollider->OverlapSize->X = 0;
 
 		PlayerCollider->OverlapSize->Y = 0;
-		
+
 		if (Velocity->X == 0)
 			PState = PlayerState::Idle;
 
@@ -205,23 +229,52 @@ void Wizard::Update(int elapsedTime)
 	else
 		Velocity->Y = 0;
 }
+#pragma endregion
 
-void Wizard::Draw(int elapsedTime)
+void GameManager::Draw(int elapsedTime)
 {
-	std::stringstream stream;
-	stream << "Player X: " << WizardPosition->X << " Y: " << WizardPosition->Y << " Velocity X: " << Velocity->X << " Velocity Y: " << Velocity->Y << " Enemy X: " << Enemy->velocity->X << " Y: " << Enemy->velocity->Y;
-
 	SpriteBatch::BeginDraw(); // Starts Drawing
 
 	switch (CurrentGameState)
 	{
-	case Wizard::GameState::Menu:
-		break;
-	case Wizard::GameState::Game:
-		break;
-	default:
-		break;
+		case GameManager::GameState::Menu:
+			MenuDraw(elapsedTime);
+			break;
+		case GameManager::GameState::Game:
+			GameDraw(elapsedTime);
+			break;
+		default:
+			break;
 	}
+
+	SpriteBatch::EndDraw(); // Ends Drawing
+}
+
+#pragma region Draw Menu Content
+void GameManager::MenuDraw(int elapsedTime)
+{
+	std::stringstream op1;
+	std::stringstream op2;
+	op1 << "Play";
+	op2 << "Exit";
+	if (MenuSelection == 0)
+	{
+		SpriteBatch::DrawString(op1.str().c_str(), new Vector2(Graphics::GetViewportWidth() / 2, Graphics::GetViewportHeight() / 2), Color::Green);
+		SpriteBatch::DrawString(op2.str().c_str(), new Vector2(Graphics::GetViewportWidth() / 2, Graphics::GetViewportHeight() / 2 + 20), Color::White);
+	}
+	else
+	{
+		SpriteBatch::DrawString(op1.str().c_str(), new Vector2(Graphics::GetViewportWidth() / 2, Graphics::GetViewportHeight() / 2), Color::White);
+		SpriteBatch::DrawString(op2.str().c_str(), new Vector2(Graphics::GetViewportWidth() / 2, Graphics::GetViewportHeight() / 2 + 20), Color::Green);
+	}
+}
+#pragma endregion
+
+#pragma region Draw Menu Content
+void GameManager::GameDraw(int elapsedTime)
+{
+	std::stringstream stream;
+	stream << "Player X: " << WizardPosition->X << " Y: " << WizardPosition->Y << " Velocity X: " << Velocity->X << " Velocity Y: " << Velocity->Y << " Enemy X: " << Enemy->velocity->X << " Y: " << Enemy->velocity->Y;
 
 	DrawEnvironmentBack(elapsedTime);
 	SpriteBatch::DrawRectangle(new Rect(0, 0, 1920, 1080), new Color(0.0f, 0.341f, 0.416f, 0.5f)); //0.443, 0.761, 0.788
@@ -245,16 +298,42 @@ void Wizard::Draw(int elapsedTime)
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
 	SpriteBatch::DrawRectangle(new Rect(25, 30, 250, 20), new Color(0.0f, 1.f, 0.0f, 0.8f)); //0.443, 0.761, 0.788
-
-	SpriteBatch::EndDraw(); // Ends Drawing
 }
+#pragma endregion
 
-void Wizard::InputHandler(int elapsedTime)
+void GameManager::InputHandler(int elapsedTime)
 {
+
 	// Gets the current state of the keyboard
 	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
 	Input::MouseState* mouseState = Input::Mouse::GetState();
+	switch (CurrentGameState)
+	{
+		case GameManager::GameState::Menu:
+			MenuInput(keyboardState, mouseState);
+			break;
+		case GameManager::GameState::Game:
+			GameInput(keyboardState, mouseState);
+			break;
+		default:
+			break;
+	}
+}
 
+void GameManager::MenuInput(Input::KeyboardState* keyboardState, Input::MouseState* mouseState)
+{
+	if (keyboardState->IsKeyDown(Input::Keys::W) || keyboardState->IsKeyDown(Input::Keys::UP))
+	{
+		MenuSelection = 0;
+	}
+	else if (keyboardState->IsKeyDown(Input::Keys::S) || keyboardState->IsKeyDown(Input::Keys::DOWN))
+	{
+		MenuSelection = 1;
+	}
+}
+
+void GameManager::GameInput(Input::KeyboardState* keyboardState, Input::MouseState* mouseState)
+{
 	if (!_paused)
 	{
 		if (keyboardState->IsKeyDown(Input::Keys::W))
@@ -285,7 +364,7 @@ void Wizard::InputHandler(int elapsedTime)
 
 		if (keyboardState->IsKeyDown(Input::Keys::SPACE))
 		{
-			Jump(elapsedTime);
+			Jump();
 		}
 
 		if (keyboardState->IsKeyDown(Input::Keys::LEFTSHIFT))
@@ -311,7 +390,7 @@ void Wizard::InputHandler(int elapsedTime)
 		_drawDebug = !_drawDebug;
 }
 
-void Wizard::DrawPlayerAnimation(int elapsedTime)
+void GameManager::DrawPlayerAnimation(int elapsedTime)
 {
 	Sleep(40);
 
@@ -333,7 +412,7 @@ void Wizard::DrawPlayerAnimation(int elapsedTime)
 	}
 }
 
-void Wizard::DrawEnvironmentFront(int elapsedTime)
+void GameManager::DrawEnvironmentFront(int elapsedTime)
 {
 	// Bottom right 
 	for (int i = 1; i < 6; i++)
@@ -376,7 +455,7 @@ void Wizard::DrawEnvironmentFront(int elapsedTime)
 	//OrbAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f - 200, (Graphics::GetViewportHeight() - 280)), false, 0.3f);
 }
 
-void Wizard::DrawEnvironmentBack(int elapsedTime)
+void GameManager::DrawEnvironmentBack(int elapsedTime)
 {
 	SpriteBatch::Draw(BGTexture, new Vector2((Graphics::GetViewportWidth() / 2), (Graphics::GetViewportHeight() / 2)), new Rect(2148.0, 2350.0, 1950.0f, 2048.0f), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 
@@ -398,14 +477,14 @@ void Wizard::DrawEnvironmentBack(int elapsedTime)
 	SpriteBatch::Draw(VegetationA, new Vector2((Graphics::GetViewportWidth() / 2) + (73 + 30), (Graphics::GetViewportHeight() / 2) - 73 * 1), new Rect(512.0f * 5, 512.0f * 1, 256, 450), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 }
 
-void Wizard::Jump(int elapsedTime)
+void GameManager::Jump()
 {
 	if (collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X, PlayerCollider->Rect->Y + PlayerCollider->Rect->Height + 1.0f)) ||
 		collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X + PlayerCollider->Rect->Width, PlayerCollider->Rect->Y + PlayerCollider->Rect->Height + 1.0f)))
 		Velocity->Y = -JumpForce;
 }
 
-void Wizard::Dash()
+void GameManager::Dash()
 {
 	if (isFlipped)
 		Velocity->X = -MathHelper::Lerp(0.0f, 2.5f, 0.4);
@@ -413,7 +492,7 @@ void Wizard::Dash()
 		Velocity->X = MathHelper::Lerp(0.0f, 2.5f, 0.4);
 }
 
-void Wizard::SetupCollisions()
+void GameManager::SetupCollisions()
 {
 	PlayerCollider = new Collision(Collision::CollisionType::Dynamic);
 	PlayerCollider->Rect->Width = 100.0f;
@@ -437,7 +516,7 @@ void Wizard::SetupCollisions()
 	PlatformCollider->Rect->Width = 73 * 4;
 }
 
-void Wizard::DrawDebugs(bool draw)
+void GameManager::DrawDebugs(bool draw)
 {
 	if (draw)
 	{
@@ -449,7 +528,7 @@ void Wizard::DrawDebugs(bool draw)
 	}
 }
 
-int Wizard::random(int min, int max) 
+int GameManager::random(int min, int max)
 {
 	static bool first = true;
 	if (first)
@@ -460,7 +539,7 @@ int Wizard::random(int min, int max)
 	return min + rand() % ((max + 1) - min);
 }
 
-void Wizard::AudioHanlder()
+void GameManager::AudioHanlder()
 {
 	BG_Music = new SoundEffect(true, 1.0f, 0.2f);
 	BG_Music->Load("Audio/BG_Music.wav");
