@@ -45,6 +45,9 @@ private:
 	Texture2D* BluePotion;
 
 	Texture2D* _menuBackground;
+	Texture2D* T_PlayButton;
+	Texture2D* T_ExitButton;
+	Texture2D* T_MenuBG;
 #pragma endregion
 
 	Vector2* WizardPrevPosition;

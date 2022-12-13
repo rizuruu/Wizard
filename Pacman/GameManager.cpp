@@ -80,6 +80,11 @@ void GameManager::LoadContent()
 	GreenSlime = new Texture2D();
 	Orb = new Texture2D();
 	BluePotion = new Texture2D();
+
+	T_PlayButton = new Texture2D();
+	T_ExitButton = new Texture2D();
+	T_MenuBG = new Texture2D();
+
 	WizardTexture_Idle->Load("Textures/PlayerIdle.png", false);
 	Platform->Load("Textures/Platform.png", false);
 	Flower->Load("Textures/Flower.png", false);
@@ -93,6 +98,11 @@ void GameManager::LoadContent()
 	GreenSlime->Load("Textures/GreenSlime.png", false);
 	Orb->Load("Textures/Orb.png", false);
 	BluePotion->Load("Textures/BluePotion.png", false);
+
+	T_PlayButton->Load("Textures/UI/PlayButton.png", false);
+	T_ExitButton->Load("Textures/UI/ExitButton.png", false);
+	T_MenuBG->Load("Textures/UI/MenuBG.png", false);
+
 	WizardPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	WizardPrevPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	Velocity = new Vector2(0.0f, 0.0f);
@@ -257,20 +267,22 @@ void GameManager::MenuDraw(int elapsedTime)
 	std::stringstream op2;
 	op1 << "Play";
 	op2 << "Exit";
+
+	SpriteBatch::Draw(T_MenuBG, _menuRectangle, nullptr);
 	if (MenuSelection == 0)
 	{
-		SpriteBatch::DrawString(op1.str().c_str(), new Vector2(Graphics::GetViewportWidth() / 2, Graphics::GetViewportHeight() / 2), Color::Green);
-		SpriteBatch::DrawString(op2.str().c_str(), new Vector2(Graphics::GetViewportWidth() / 2, Graphics::GetViewportHeight() / 2 + 20), Color::White);
+		SpriteBatch::Draw(T_PlayButton, new Vector2(Graphics::GetViewportWidth() / 2 - 64 - 32, Graphics::GetViewportHeight() / 2 - 20), new Rect(0, 0, 128, 40), Vector2::Zero, 1.5f, 0.0f, Color::Green, SpriteEffect::NONE);
+		SpriteBatch::Draw(T_ExitButton, new Vector2(Graphics::GetViewportWidth() / 2 - 64, Graphics::GetViewportHeight() / 2 + 20 + 64), new Rect(0, 0, 128, 40), Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
 	}
 	else
 	{
-		SpriteBatch::DrawString(op1.str().c_str(), new Vector2(Graphics::GetViewportWidth() / 2, Graphics::GetViewportHeight() / 2), Color::White);
-		SpriteBatch::DrawString(op2.str().c_str(), new Vector2(Graphics::GetViewportWidth() / 2, Graphics::GetViewportHeight() / 2 + 20), Color::Green);
+		SpriteBatch::Draw(T_PlayButton, new Vector2(Graphics::GetViewportWidth() / 2 - 64, Graphics::GetViewportHeight() / 2 - 20 - 64), new Rect(0, 0, 128, 40), Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
+		SpriteBatch::Draw(T_ExitButton, new Vector2(Graphics::GetViewportWidth() / 2 - 64 - 32, Graphics::GetViewportHeight() / 2 + 20), new Rect(0, 0, 128, 40), Vector2::Zero, 1.5f, 0.0f, Color::Green, SpriteEffect::NONE);
 	}
 }
 #pragma endregion
 
-#pragma region Draw Menu Content
+#pragma region Draw Game Content
 void GameManager::GameDraw(int elapsedTime)
 {
 	std::stringstream stream;
@@ -329,6 +341,14 @@ void GameManager::MenuInput(Input::KeyboardState* keyboardState, Input::MouseSta
 	else if (keyboardState->IsKeyDown(Input::Keys::S) || keyboardState->IsKeyDown(Input::Keys::DOWN))
 	{
 		MenuSelection = 1;
+	}
+
+	if (keyboardState->IsKeyDown(Input::Keys::RETURN))
+	{
+		if (MenuSelection)
+			exit(0);
+		else
+			CurrentGameState = GameState::Game;
 	}
 }
 
