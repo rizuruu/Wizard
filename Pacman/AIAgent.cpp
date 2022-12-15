@@ -7,9 +7,12 @@ AIAgent::AIAgent()
 
 	velocity = new Vector2();
 	PrevPosition = new Vector2();
-	rect = new Rect(1300, 500, 158, 100);
+	rect = new Rect(1300, 500, 170, 250);
 	collision->Rect = rect;
 
+	R_HealthBar = new Rect(rect->X + 70, rect->Y + 10, 180, 12);
+	Health = float(1.0f);
+	isFlipped = true;
 }
 
 AIAgent::~AIAgent()
@@ -34,8 +37,6 @@ void AIAgent::UpdateAI(int elapsedTime)
 	collision->Rect->Y = rect->Y;
 	if (abs(collision->OverlapSize->X) > 0.0f || abs(collision->OverlapSize->Y) > 0.0f)
 	{
-		CurrentState = AIState::Grounded;
-
 		if (abs(collision->OverlapSize->X) > 0.0f)
 			wasOverlapping = true;
 
@@ -65,19 +66,77 @@ void AIAgent::UpdateAI(int elapsedTime)
 	if (!CollisionManager::Instance->IsCollider(Vector2(rect->X, rect->Y + rect->Height + 1.0f)) &&
 		!CollisionManager::Instance->IsCollider(Vector2(rect->X + rect->Width, rect->Y + rect->Height + 1.0f)))
 	{
-		CurrentState = AIState::InAir;
 		velocity->Y += 0.1f;
 	}
 	else
 		velocity->Y = 0;
 
-	cout << "distance: " << abs(rect->X - GameManager::Instance->WizardPosition->X) << endl;
-	if (CurrentState == AIState::Grounded && abs(rect->X - GameManager::Instance->WizardPosition->X) < 500.0f)
-		rect->X = MathHelper::Lerp(rect->X, GameManager::Instance->WizardPosition->X, 0.1f);
+	if (abs(rect->X - GameManager::Instance->WizardPosition->X) < 500.0f)
+	{
+		if (rect->X - GameManager::Instance->WizardPosition->X > 0)
+			isFlipped = false;
+		else 
+			isFlipped = true;
 
+		if (abs(rect->X - GameManager::Instance->WizardPosition->X) > 200.0f)
+		{
+			CurrentState = AIState::Walking;
+			rect->X = MathHelper::Lerp(rect->X, GameManager::Instance->WizardPosition->X, 0.02f);
+		}
+		else
+		{
+			if (GameManager::Instance->PState == GameManager::PlayerState::Dead)
+				CurrentState = AIState::Idle;
+			else
+				CurrentState = AIState::Attacking;
+		}
+	}
+	else
+		CurrentState = AIState::Idle;
+
+	R_HealthBar->X = rect->X + 70;
+	R_HealthBar->Y = rect->Y + 10;
 }
 
-void AIAgent::DrawAI(AnimationSequence* sequence)
+void AIAgent::DrawAI(AnimationSequence* IdleSequence, AnimationSequence* WalkSequence, AnimationSequence* AttackSequence)
 {
-	sequence->PlaySequence(new Vector2(rect->X, rect->Y), false, 0.5f);
+	//SpriteBatch::DrawRectangle(new Rect(rect->X, rect->Y + 10, 20, 30), Color::White); //0.443, 0.761, 0.788
+	//SpriteBatch::DrawRectangle(new Rect(25, 30, 250, 20), new Color(0.0f, 0.0f, 0.0f, 0.5f)); //0.443, 0.761, 0.788
+	SpriteBatch::DrawRectangle(R_HealthBar, new Color(0.0f, 0.0f, 0.0f, 0.5f)); //0.443, 0.761, 0.788
+	SpriteBatch::DrawRectangle(R_HealthBar, Color::Green); //0.443, 0.761, 0.788
+
+	switch (CurrentState)
+	{
+	case AIAgent::AIState::Idle:
+		IdleSequence->PlaySequence(new Vector2(rect->X, rect->Y), isFlipped, 0.7f);
+		break;
+	case AIAgent::AIState::Walking:
+		WalkSequence->PlaySequence(new Vector2(rect->X, rect->Y), isFlipped, 0.7f);
+		break;
+	case AIAgent::AIState::Attacking:
+		if (AttackSequence->PlaySequenceOnce(new Vector2(rect->X, rect->Y), isFlipped, 0.7f))
+		{
+			GameManager::Instance->Damage(0.0f);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void AIAgent::Damage(float damage)
+{
+	if (Health > 0)
+	{
+		//PState = PlayerState::Damage;
+
+		//float N_HealthBar = R_HealthBar->Width / 180.0f;
+		Health -= 0.1f;
+		R_HealthBar->Width = Health * 180.0f;
+		cout << Health << endl;
+	}
+	else
+	{
+		//PState = PlayerState::Dead;
+	}
 }

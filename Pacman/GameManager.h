@@ -31,8 +31,11 @@ private:
 	// Data to represent Pacman
 #pragma region Textures
 	Texture2D* WizardTexture_Idle;
+	Texture2D* WizardTexture_Walk;
 	Texture2D* WizardTexture_Run;
 	Texture2D* WizardTexture_Jump;
+	Texture2D* WizardTexture_Damage;
+	Texture2D* T_PlayerDead;
 	Texture2D* _AttackTexture;
 	Texture2D* Platform;
 	Texture2D* Flower;
@@ -43,6 +46,10 @@ private:
 	Texture2D* GreenSlime;
 	Texture2D* Orb;
 	Texture2D* BluePotion;
+
+	Texture2D* T_Monster_Idle;
+	Texture2D* T_Monster_Walk;
+	Texture2D* T_Monster_Attack;
 
 	Texture2D* _menuBackground;
 	Texture2D* T_PlayButton;
@@ -56,6 +63,7 @@ private:
 	Rect* Tile_Rect2;
 	// Data for Menu
 	Rect* _menuRectangle;
+	Rect* R_HealthBar;
 	// Position for String
 
 	Vector2* _stringPosition;
@@ -76,20 +84,27 @@ private:
 
 #pragma region Animation Sequences
 	AnimationSequence* IdleAnimator;
+	AnimationSequence* WalkAnimator;
 	AnimationSequence* RunAnimator;
 	AnimationSequence* JumpAnimator;
 	AnimationSequence* AttackAnimator;
+	AnimationSequence* DamageAnimator;
 	AnimationSequence* FlowerAnimator;
 	AnimationSequence* WindPlantAnimator;
 	AnimationSequence* GreenSlimeAnimator;
 	AnimationSequence* OrbAnimator;
+
+	AnimationSequence* MonsterIdleAnimator;
+	AnimationSequence* MonsterRunAnimator;
+	AnimationSequence* MonsterAttackAnimator;
 #pragma endregion
 
 #pragma region Audio & Sound FX
 	SoundEffect* BG_Music;
 #pragma endregion
 
-	const float WizardSpeed = 0.1f;
+	const float WizardSpeed = 0.08f;
+	const float RunSpeed = 0.8f;
 
 	Vector2* Velocity;
 	const float Gravity = 0.15f;
@@ -129,6 +144,7 @@ public:
 	void virtual GameInput(Input::KeyboardState* KState, Input::MouseState* MState);
 	void virtual Jump();
 	void virtual Dash();
+	void virtual Damage(float damage);
 	void virtual SetupCollisions();
 	int random(int min, int max);
 
@@ -150,9 +166,14 @@ public:
 	enum class PlayerState
 	{
 		Idle,
+		Walk,
 		Running,
 		Jumping,
 		Attacking,
+		Damage,
+		Frozen,
+		Stone,
+		Dead,
 	};	
 	
 	enum class GameState
