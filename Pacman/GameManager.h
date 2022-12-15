@@ -101,6 +101,8 @@ private:
 
 #pragma region Audio & Sound FX
 	SoundEffect* BG_Music;
+	SoundEffect* S_Whoosh;
+	SoundEffect* S_Hit;
 #pragma endregion
 
 	const float WizardSpeed = 0.08f;

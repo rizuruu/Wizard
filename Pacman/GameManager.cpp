@@ -34,6 +34,7 @@ GameManager::GameManager(int argc, char* argv[]) : Game(argc, argv), WizardSpeed
 
 	//Initialise important Game aspects
 	S2D::Audio::Initialise();
+	AudioHanlder();
 	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, false, 25, 25, "Wizard", 60);
 	Input::Initialise();
 	Graphics::StartGameLoop();
@@ -346,7 +347,9 @@ void GameManager::InputHandler(int elapsedTime)
 			MenuInput(keyboardState, mouseState);
 			break;
 		case GameManager::GameState::Game:
-			if (PState != PlayerState::Dead)
+			if (PState == PlayerState::Dead || PState == PlayerState::Frozen)
+				return;
+			else
 				GameInput(keyboardState, mouseState);
 			break;
 		default:
@@ -403,7 +406,10 @@ void GameManager::GameInput(Input::KeyboardState* keyboardState, Input::MouseSta
 			isFlipped = true;
 		}
 		else if (mouseState->LeftButton == Input::ButtonState::PRESSED)
+		{
+			Audio::Play(S_Whoosh);
 			PState = PlayerState::Attacking;
+		}
 		else
 		{
 			if (PState != PlayerState::Damage && PState != PlayerState::Dead)
@@ -560,6 +566,7 @@ void GameManager::Dash()
 
 void GameManager::Damage(float damage)
 {
+	Audio::Play(S_Hit);
 	if (*Health > 0)
 	{
 		PState = PlayerState::Damage;
@@ -624,7 +631,11 @@ int GameManager::random(int min, int max)
 
 void GameManager::AudioHanlder()
 {
-	BG_Music = new SoundEffect(true, 1.0f, 0.2f);
-	BG_Music->Load("Audio/BG_Music.wav");
+	BG_Music = new SoundEffect(true, 1.0f, 0.5f);
+	S_Whoosh = new SoundEffect(false, 1.0f, 1.0f);
+	S_Hit = new SoundEffect(false, 1.0f, 0.6f);
+	BG_Music->Load("Audio/BG_Music_Alt.wav");
+	S_Whoosh->Load("Audio/Whoosh1.wav");
+	S_Hit->Load("Audio/HitEffect.wav");
 	Audio::Play(BG_Music);
 }

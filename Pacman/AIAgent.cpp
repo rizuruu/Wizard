@@ -96,6 +96,7 @@ void AIAgent::UpdateAI(int elapsedTime)
 
 	R_HealthBar->X = rect->X + 70;
 	R_HealthBar->Y = rect->Y + 10;
+	cout << collision->OverlapSize->X << endl;
 }
 
 void AIAgent::DrawAI(AnimationSequence* IdleSequence, AnimationSequence* WalkSequence, AnimationSequence* AttackSequence)
@@ -126,17 +127,16 @@ void AIAgent::DrawAI(AnimationSequence* IdleSequence, AnimationSequence* WalkSeq
 
 void AIAgent::Damage(float damage)
 {
-	if (Health > 0)
+	if (abs(rect->X - GameManager::Instance->WizardPosition->X) <= 200.0f)
 	{
-		//PState = PlayerState::Damage;
-
-		//float N_HealthBar = R_HealthBar->Width / 180.0f;
-		Health -= 0.1f;
-		R_HealthBar->Width = Health * 180.0f;
-		cout << Health << endl;
-	}
-	else
-	{
-		//PState = PlayerState::Dead;
+		if (Health > 0)
+		{
+			Health -= 0.1f;
+			R_HealthBar->Width = Health * 180.0f;
+		}
+		else
+		{
+			//PState = PlayerState::Dead;
+		}
 	}
 }
