@@ -27,6 +27,14 @@ void CollisionManager::Update(int elapsedTime)
 				{
 					(*Collisions)[i]->UpdateCollision(*(* Collisions)[j]);
 				}
+				else if (i != j)
+				{
+					if ((*Collisions)[i]->IsOverlapping(*(*Collisions)[j]))
+					{
+						(*Collisions)[i]->OnTriggerStay();
+						(*Collisions)[j]->OnTriggerStay();
+					}
+				}
 			}
 		}
 	}

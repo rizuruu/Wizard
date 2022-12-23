@@ -2,6 +2,7 @@
 #include "AnimationSequence.h"
 #include <vector>
 #include <chrono>
+#include <future>
 #include <thread>
 #include <sstream>
 #include "wtypes.h"
@@ -9,10 +10,11 @@
 #include <iostream>
 #include <cstdlib>
 #include "Collision.h"
+
 using namespace std;
 GameManager* GameManager::Instance = NULL;
 
-GameManager::GameManager(int argc, char* argv[]) : Game(argc, argv), WizardSpeed(0.3f)
+GameManager::GameManager(int argc, char* argv[]) : Game(argc, argv), WitchSpeed(0.3f)
 {
 	GameManager::Instance = this;
 	collisionManager = new CollisionManager();
@@ -26,7 +28,9 @@ GameManager::GameManager(int argc, char* argv[]) : Game(argc, argv), WizardSpeed
 	AttackFramesVector = Vector2(5, 4);
 	FlowerFramesVector = Vector2(10, 6);
 	Health = new float(1.0f);
-	Enemy = new AIAgent();
+
+	AI_Monster = new AIAgent(AIAgent::AI_Type::Attack, Vector2(400, 100));
+	AI_FreezingBlob = new AIAgent(AIAgent::AI_Type::Trigger, Vector2(700, 200));
 
 	RECT desktop;
 	const HWND hDesktop = GetDesktopWindow();
@@ -35,52 +39,53 @@ GameManager::GameManager(int argc, char* argv[]) : Game(argc, argv), WizardSpeed
 	//Initialise important Game aspects
 	S2D::Audio::Initialise();
 	AudioHanlder();
-	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, false, 25, 25, "Wizard", 60);
+	Graphics::Initialise(argc, argv, this, desktop.right, desktop.bottom, true, 25, 25, "Wizard", 60);
 	Input::Initialise();
 	Graphics::StartGameLoop();
 }
 
 GameManager::~GameManager()
 {
-	delete WizardTexture_Idle;
+	delete T_Player_Idle;
+	delete T_Player_Walk;
+	delete T_Player_Run;
+	delete T_Player_Jump;
+	delete T_Player_Damage;
+	delete T_Player_Dead;
+	delete T_Player_Frozen;
+	delete T_Player_Attack;
+
+	delete T_Monster_Idle;
+	delete T_Monster_Walk;
+	delete T_Monster_Attack;
+	delete T_Monster_Dead;
+
+	delete T_FreezingBlob_Idle;
+
+	delete A_Monster_Idle;
+	delete A_Monster_Walk;
+	delete A_Monster_Attack;
+
+	delete A_FreezingBlob_Idle;
+
 	delete WizardRect;
-	delete WizardPosition;
+	delete WitchPosition;
 	delete Instance;
 
 	delete PlayerCollider;
 	delete GroundCollider;
 	delete EdgePlatformCollider;
 	delete PlatformCollider;
+	delete S_PlatformCollider;
 
-	delete Enemy;
+	delete AI_Monster;
+	delete AI_FreezingBlob;
 	delete Velocity;
 	delete BG_Music;
 }
 
 void GameManager::LoadContent()
 {
-	IdleAnimator = new AnimationSequence();
-	WalkAnimator = new AnimationSequence();
-	RunAnimator = new AnimationSequence();
-	JumpAnimator = new AnimationSequence();
-	AttackAnimator = new AnimationSequence();
-	DamageAnimator = new AnimationSequence();
-	FlowerAnimator = new AnimationSequence();
-	WindPlantAnimator = new AnimationSequence();
-	GreenSlimeAnimator = new AnimationSequence();
-	OrbAnimator = new AnimationSequence();
-	MonsterIdleAnimator = new AnimationSequence();
-	MonsterRunAnimator = new AnimationSequence();
-	MonsterAttackAnimator = new AnimationSequence();
-
-	// Load Pacman
-	WizardTexture_Idle = new Texture2D();
-	WizardTexture_Walk = new Texture2D();
-	WizardTexture_Run = new Texture2D();
-	WizardTexture_Jump = new Texture2D();
-	_AttackTexture = new Texture2D();
-	WizardTexture_Damage = new Texture2D();
-	T_PlayerDead = new Texture2D();
 	Platform = new Texture2D();
 	Flower = new Texture2D();
 	Tile = new Texture2D();
@@ -90,44 +95,35 @@ void GameManager::LoadContent()
 	GreenSlime = new Texture2D();
 	Orb = new Texture2D();
 	BluePotion = new Texture2D();
-	T_Monster_Idle = new Texture2D();
-	T_Monster_Walk = new Texture2D();
-	T_Monster_Attack = new Texture2D();
 
 	T_PlayButton = new Texture2D();
 	T_ExitButton = new Texture2D();
 	T_MenuBG = new Texture2D();
 
-	WizardTexture_Idle->Load("Textures/Witch/Witch_Idle.png", false);
 	Platform->Load("Textures/Platform.png", false);
 	Flower->Load("Textures/Flower.png", false);
 	WindPlant->Load("Textures/Plants/WindPlant.png", false);
-	WizardTexture_Walk->Load("Textures/Witch/Witch_Walk.png", false);
-	WizardTexture_Run->Load("Textures/Witch/Witch_Run.png", false);
-	WizardTexture_Jump->Load("Textures/Witch/Witch_Jump.png", false);
-	_AttackTexture->Load("Textures/Witch/Witch_Swinging.png", false);
-	WizardTexture_Damage->Load("Textures/Witch/Witch_Damage.png", false);
-	T_PlayerDead->Load("Textures/Witch/Witch_Dead.png", false);
 	Tile->Load("Textures/TileSet.png", false);
 	VegetationA->Load("Textures/VegetationA.png", false);
 	BGTexture->Load("Textures/BG.png", false);
 	GreenSlime->Load("Textures/GreenSlime.png", false);
 	Orb->Load("Textures/Orb.png", false);
 	BluePotion->Load("Textures/BluePotion.png", false);
-	T_Monster_Idle->Load("Textures/Enemy/Enemy_Idle.png", false);
-	T_Monster_Walk->Load("Textures/Enemy/Enemy_Walk.png", false);
-	T_Monster_Attack->Load("Textures/Enemy/Enemy_Swinging.png", false);
 
 	T_PlayButton->Load("Textures/UI/PlayButton.png", false);
 	T_ExitButton->Load("Textures/UI/ExitButton.png", false);
 	T_MenuBG->Load("Textures/UI/MenuBG.png", false);
 
-	WizardPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
+
+	LoadPlayerTextutres();
+	LoadAITextutres();
+	InitializeSequences();
+
+	WitchPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	WizardPrevPosition = new Vector2(-128.0f, Graphics::GetViewportHeight()/3);
 	Velocity = new Vector2(0.0f, 0.0f);
 	int t = 0;
 
-	InitializeSequences();
 
 	WizardRect = new Rect(0.0f, 0.0f, 847, 864);
 	Tile_Rect = new Rect(512.0f, 0.0f, 512, 512);
@@ -147,30 +143,112 @@ void GameManager::LoadContent()
 	_menuStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
 }
 
+void GameManager::LoadPlayerTextutres()
+{
+#pragma region Load Player Textures
+	T_Player_Idle = new Texture2D();
+	T_Player_Idle->Load("Textures/Witch/Witch_Idle.png", false);
+
+	T_Player_Walk = new Texture2D();
+	T_Player_Walk->Load("Textures/Witch/Witch_Walk.png", false);
+
+	T_Player_Run = new Texture2D();
+	T_Player_Run->Load("Textures/Witch/Witch_Run.png", false);
+
+	T_Player_Jump = new Texture2D();
+	T_Player_Jump->Load("Textures/Witch/Witch_Jump.png", false);
+
+	T_Player_Attack = new Texture2D();
+	T_Player_Attack->Load("Textures/Witch/Witch_Swinging.png", false);
+
+	T_Player_Damage = new Texture2D();
+	T_Player_Damage->Load("Textures/Witch/Witch_Damage.png", false);
+
+	T_Player_Dead = new Texture2D();
+	T_Player_Dead->Load("Textures/Witch/Witch_Dead.png", false);
+
+	T_Player_Frozen = new Texture2D();
+	T_Player_Frozen->Load("Textures/Witch/Witch_Frozen.png", false);
+#pragma endregion
+}
+
+void GameManager::LoadAITextutres()
+{
+#pragma region Load AI Textures
+	T_Monster_Idle = new Texture2D();
+	T_Monster_Idle->Load("Textures/Enemy/Enemy_Idle.png", false);
+
+	T_Monster_Walk = new Texture2D();
+	T_Monster_Walk->Load("Textures/Enemy/Enemy_Walk.png", false);
+
+	T_Monster_Attack = new Texture2D();
+	T_Monster_Attack->Load("Textures/Enemy/Enemy_Swinging.png", false);
+
+	T_Monster_Dead = new Texture2D();
+	T_Monster_Dead->Load("Textures/Enemy/Enemy_Dead.png", false);
+
+	T_FreezingBlob_Idle = new Texture2D();
+	T_FreezingBlob_Idle->Load("Textures/FreezingBlob/FreezingBlob_Idle.png", false);
+#pragma endregion
+}
+
 void GameManager::InitializeSequences()
 {
-	Sequence sequence;
-	sequence.FramesCount = 14;
-	sequence.grid = IdleFramesVector;
-	sequence.Source = WizardTexture_Idle;
-	sequence.width = 480;
-	sequence.height = 480;
-	IdleAnimator->Initialize(sequence);
+	// Player Sequences
+	A_Player_Idle = new AnimationSequence();
+	A_Player_Idle->Initialize(T_Player_Idle, 14, IdleFramesVector, 480, 480);
 
-	WalkAnimator->Initialize(WizardTexture_Walk, 28, Vector2(5, 6), 480, 480);
-	RunAnimator->Initialize(WizardTexture_Run, 16, Vector2(5, 4), 480, 480);
-	AttackAnimator->Initialize(_AttackTexture, 16, AttackFramesVector, 480, 480);
-	JumpAnimator->Initialize(WizardTexture_Jump, 25, Vector2(5, 5), 480, 480);
-	DamageAnimator->Initialize(WizardTexture_Damage, 12, Vector2(5, 3), 480, 480);
+	A_Player_Walk = new AnimationSequence();
+	A_Player_Walk->Initialize(T_Player_Walk, 28, Vector2(5, 6), 480, 480);
 
+	A_Player_Run = new AnimationSequence();
+	A_Player_Run->Initialize(T_Player_Run, 16, Vector2(5, 4), 480, 480);
+
+	A_Player_Jump = new AnimationSequence();
+	A_Player_Jump->Initialize(T_Player_Jump, 25, Vector2(5, 5), 480, 480);
+
+	A_Player_Attack = new AnimationSequence();
+	A_Player_Attack->Initialize(T_Player_Attack, 16, AttackFramesVector, 480, 480);
+
+	A_Player_Damage = new AnimationSequence();
+	A_Player_Damage->Initialize(T_Player_Damage, 12, Vector2(5, 3), 480, 480);
+
+	// Monster Sequences
+	A_Monster_Idle = new AnimationSequence();
+	A_Monster_Idle->Initialize(T_Monster_Idle, 14, Vector2(5, 3), 480, 480);
+
+	A_Monster_Walk = new AnimationSequence();
+	A_Monster_Walk->Initialize(T_Monster_Walk, 28, Vector2(5, 6), 480, 480);
+
+	A_Monster_Attack = new AnimationSequence();
+	A_Monster_Attack->Initialize(T_Monster_Attack, 16, Vector2(5, 4), 480, 480);
+
+	AI_Monster->A_Idle = A_Monster_Idle;
+	AI_Monster->A_Walk = A_Monster_Walk;
+	AI_Monster->A_Attack = A_Monster_Attack;
+	AI_Monster->T_Dead = T_Monster_Dead;
+
+	// Freezing Blob Sequences
+	A_FreezingBlob_Idle = new AnimationSequence();
+	A_FreezingBlob_Idle->Initialize(T_FreezingBlob_Idle, 14, Vector2(5, 3), 480, 480);
+
+	AI_FreezingBlob->A_Idle = A_FreezingBlob_Idle;
+	AI_FreezingBlob->A_Walk = A_FreezingBlob_Idle;
+	AI_FreezingBlob->A_Attack = A_Monster_Attack;
+	AI_FreezingBlob->collision->OnTriggerStay = &OnStay;
+
+	// Environment Sequences
+	FlowerAnimator = new AnimationSequence();
 	FlowerAnimator->Initialize(Flower, 60, FlowerFramesVector, 768, 768);
-	WindPlantAnimator->Initialize(WindPlant, 30, Vector2(6, 5), 512, 512);
-	GreenSlimeAnimator->Initialize(GreenSlime, 30, Vector2(5, 6), 376, 256);
-	OrbAnimator->Initialize(Orb, 30, Vector2(5, 6), 480, 480);
 
-	MonsterIdleAnimator->Initialize(T_Monster_Idle, 14, Vector2(5, 3), 480, 480);
-	MonsterRunAnimator->Initialize(T_Monster_Walk, 28, Vector2(5, 6), 480, 480);
-	MonsterAttackAnimator->Initialize(T_Monster_Attack, 16, Vector2(5, 4), 480, 480);
+	WindPlantAnimator = new AnimationSequence();
+	WindPlantAnimator->Initialize(WindPlant, 30, Vector2(6, 5), 512, 512);
+
+	GreenSlimeAnimator = new AnimationSequence();
+	GreenSlimeAnimator->Initialize(GreenSlime, 30, Vector2(5, 6), 376, 256);
+
+	OrbAnimator = new AnimationSequence();
+	OrbAnimator->Initialize(Orb, 30, Vector2(5, 6), 480, 480);
 }
 
 void GameManager::Update(int elapsedTime)
@@ -200,14 +278,14 @@ void GameManager::MenuUpdate(int elapsedTime)
 void GameManager::GameUpdate(int elapsedTime)
 {
 	InputHandler(elapsedTime);
-	WizardPrevPosition->X = WizardPosition->X;
-	WizardPrevPosition->Y = WizardPosition->Y;
-	WizardPosition->X += Velocity->X * elapsedTime;
+	WizardPrevPosition->X = WitchPosition->X;
+	WizardPrevPosition->Y = WitchPosition->Y;
+	WitchPosition->X += Velocity->X * elapsedTime;
 
-	WizardPosition->Y += Velocity->Y * elapsedTime;
+	WitchPosition->Y += Velocity->Y * elapsedTime;
 
-	PlayerCollider->Rect->X = WizardPosition->X + 150;
-	PlayerCollider->Rect->Y = WizardPosition->Y + 130;
+	PlayerCollider->Rect->X = WitchPosition->X + 150;
+	PlayerCollider->Rect->Y = WitchPosition->Y + 130;
 
 	GroundCollider->Rect->X = 0;
 	GroundCollider->Rect->Y = Graphics::GetViewportHeight() - 73;
@@ -218,8 +296,12 @@ void GameManager::GameUpdate(int elapsedTime)
 	PlatformCollider->Rect->X = (Graphics::GetViewportWidth() / 2) - (73 * 2);
 	PlatformCollider->Rect->Y = (Graphics::GetViewportHeight() / 2);
 
+	S_PlatformCollider->Rect->X = (Graphics::GetViewportWidth() / 2) + 300;
+	S_PlatformCollider->Rect->Y = (Graphics::GetViewportHeight() / 2) + 100;
+
 	collisionManager->Update(elapsedTime);
-	Enemy->UpdateAI(elapsedTime);
+	AI_Monster->UpdateAI(elapsedTime);
+	AI_FreezingBlob->UpdateAI(elapsedTime);
 
 	if (abs(PlayerCollider->OverlapSize->X) > 0.0f || abs(PlayerCollider->OverlapSize->Y) > 0.0f)
 	{
@@ -228,10 +310,10 @@ void GameManager::GameUpdate(int elapsedTime)
 			while (collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X, PlayerCollider->Rect->Y + PlayerCollider->Rect->Height)) ||
 				collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X + PlayerCollider->Rect->Width, PlayerCollider->Rect->Y + PlayerCollider->Rect->Height)))
 			{
-				WizardPosition->Y--;
+				WitchPosition->Y--;
 				Velocity->Y = 0;
-				PlayerCollider->Rect->X = WizardPosition->X + 150;
-				PlayerCollider->Rect->Y = WizardPosition->Y + 130;
+				PlayerCollider->Rect->X = WitchPosition->X + 150;
+				PlayerCollider->Rect->Y = WitchPosition->Y + 130;
 			}
 
 		}
@@ -239,13 +321,13 @@ void GameManager::GameUpdate(int elapsedTime)
 		while (collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X, PlayerCollider->Rect->Y + 1.0f)) ||
 			collisionManager->IsCollider(Vector2(PlayerCollider->Rect->X + PlayerCollider->Rect->Width, PlayerCollider->Rect->Y + 1.0f)))
 		{
-			WizardPosition->Y++;
+			WitchPosition->Y++;
 			Velocity->Y = 0;
-			PlayerCollider->Rect->X = WizardPosition->X + 150;
-			PlayerCollider->Rect->Y = WizardPosition->Y + 130;
+			PlayerCollider->Rect->X = WitchPosition->X + 150;
+			PlayerCollider->Rect->Y = WitchPosition->Y + 130;
 		}
 
-		WizardPosition->X = WizardPrevPosition->X;
+		WitchPosition->X = WizardPrevPosition->X;
 		PlayerCollider->OverlapSize->X = 0;
 
 		PlayerCollider->OverlapSize->Y = 0;
@@ -325,13 +407,14 @@ void GameManager::GameDraw(int elapsedTime)
 		DrawPlayerAnimation(elapsedTime);
 	}
 
-	Enemy->DrawAI(MonsterIdleAnimator, MonsterRunAnimator, MonsterAttackAnimator);
+	AI_Monster->DrawAI();
+	AI_FreezingBlob->DrawAI();
 	DrawEnvironmentFront(elapsedTime);
 	DrawDebugs(_drawDebug);
 
 	SpriteBatch::DrawRectangle(new Rect(20, 25, 260, 30), Color::White); //0.443, 0.761, 0.788
 	SpriteBatch::DrawRectangle(new Rect(25, 30, 250, 20), new Color(0.0f, 0.0f, 0.0f, 0.5f)); //0.443, 0.761, 0.788
-	SpriteBatch::DrawRectangle(R_HealthBar, Color::Green); //0.443, 0.761, 0.788
+	SpriteBatch::DrawRectangle(R_HealthBar, new Color(1.2 - *Health, *Health, 0.0f)); //0.443, 0.761, 0.788
 }
 #pragma endregion
 
@@ -391,7 +474,7 @@ void GameManager::GameInput(Input::KeyboardState* keyboardState, Input::MouseSta
 		}
 		else if (keyboardState->IsKeyDown(Input::Keys::A))
 		{
-			Velocity->X = -WizardSpeed;
+			Velocity->X = -WitchSpeed;
 			PState = PlayerState::Walk;
 			isFlipped = false;
 		}
@@ -401,13 +484,13 @@ void GameManager::GameInput(Input::KeyboardState* keyboardState, Input::MouseSta
 		}
 		else if (keyboardState->IsKeyDown(Input::Keys::D))
 		{
-			Velocity->X = WizardSpeed;
+			Velocity->X = WitchSpeed;
 			PState = PlayerState::Walk;
 			isFlipped = true;
 		}
 		else if (mouseState->LeftButton == Input::ButtonState::PRESSED)
 		{
-			Audio::Play(S_Whoosh);
+			Audio::Play(SFX_Whoosh);
 			PState = PlayerState::Attacking;
 		}
 		else
@@ -426,13 +509,13 @@ void GameManager::GameInput(Input::KeyboardState* keyboardState, Input::MouseSta
 		if (keyboardState->IsKeyDown(Input::Keys::LEFTSHIFT))
 		{
 			PState = PlayerState::Running;
-			Dash();
+			Sprint();
 		}
 
 
-		if (WizardPosition->X > Graphics::GetViewportWidth())
+		if (WitchPosition->X > Graphics::GetViewportWidth())
 		{
-			WizardPosition->X = -WizardRect->Width;
+			WitchPosition->X = -WizardRect->Width;
 		}
 	}
 
@@ -446,7 +529,7 @@ void GameManager::GameInput(Input::KeyboardState* keyboardState, Input::MouseSta
 
 	if (keyboardState->IsKeyDown(Input::Keys::DECIMAL))
 	{
-		_drawDebug = true;
+		//_drawDebug = true;
 	}
 }
 
@@ -457,29 +540,32 @@ void GameManager::DrawPlayerAnimation(int elapsedTime)
 	switch (PState)
 	{
 		case PlayerState::Idle:
-			IdleAnimator->PlaySequence(WizardPosition, isFlipped, 0.8f);
+			A_Player_Idle->PlaySequence(WitchPosition, isFlipped, 0.8f);
 			break;
 		case PlayerState::Walk:
-			WalkAnimator->PlaySequence(WizardPosition, isFlipped, 0.8f);
+			A_Player_Walk->PlaySequence(WitchPosition, isFlipped, 0.8f);
 			break;
 		case PlayerState::Running:
-			RunAnimator->PlaySequence(WizardPosition, isFlipped, 0.8f);
+			A_Player_Run->PlaySequence(WitchPosition, isFlipped, 0.8f);
 			break;
 		case PlayerState::Jumping:
-			JumpAnimator->PlaySequence(WizardPosition, isFlipped, 0.8f);
+			A_Player_Jump->PlaySequence(WitchPosition, isFlipped, 0.8f);
 			break;
 		case PlayerState::Attacking:
-			if (AttackAnimator->PlaySequenceOnce(WizardPosition, isFlipped, 0.8f))
+			if (A_Player_Attack->PlaySequenceOnce(WitchPosition, isFlipped, 0.8f))
 			{
-				Enemy->Damage(0.0f);
+				AI_Monster->Damage(0.0f);
 				PState = PlayerState::Idle;
 			}
 			break;
 		case PlayerState::Damage:
-			DamageAnimator->PlaySequence(WizardPosition, isFlipped, 0.8f);
+			A_Player_Damage->PlaySequence(WitchPosition, isFlipped, 0.8f);
 			break;
 		case PlayerState::Dead:
-			SpriteBatch::Draw(T_PlayerDead, WizardPosition , new Rect(0, 0, 480, 480), Vector2::Zero, 0.8f, 0.0f, Color::White, isFlipped ? SpriteEffect::FLIPHORIZONTAL : SpriteEffect::NONE);
+			SpriteBatch::Draw(T_Player_Dead, WitchPosition , new Rect(0, 0, 480, 480), Vector2::Zero, 0.8f, 0.0f, Color::White, isFlipped ? SpriteEffect::FLIPHORIZONTAL : SpriteEffect::NONE);
+			break;
+		case PlayerState::Frozen:
+			SpriteBatch::Draw(T_Player_Frozen, WitchPosition , new Rect(0, 0, 480, 480), Vector2::Zero, 0.8f, 0.0f, Color::White, isFlipped ? SpriteEffect::FLIPHORIZONTAL : SpriteEffect::NONE);
 			break;
 	}
 }
@@ -489,7 +575,6 @@ void GameManager::DrawEnvironmentFront(int elapsedTime)
 	// Bottom right 
 	for (int i = 1; i < 6; i++)
 	{
-		int r = random(1, 2);
 		SpriteBatch::Draw(Tile, new Vector2(Graphics::GetViewportWidth() - (i * 73), (Graphics::GetViewportHeight() - 200)), new Rect(0.0f, 0.0f, 512, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	}
 
@@ -515,16 +600,11 @@ void GameManager::DrawEnvironmentFront(int elapsedTime)
 	}
 
 	// Platform
-	for (int i = 0; i < 3; i++)
-	{
-	}
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) - 73 * 3, (Graphics::GetViewportHeight() / 2)), new Rect(0 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) - 73, (Graphics::GetViewportHeight() / 2)), new Rect(1 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) + 73, (Graphics::GetViewportHeight() / 2)), new Rect(2 * 512.0f, 3 * 512.0f, 512, 510), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 	
-	//SpriteBatch::Draw(BluePotion, new Vector2((Graphics::GetViewportWidth() / 2), (Graphics::GetViewportHeight() - 150)), new Rect(128.0f, 128.0f, 128.0f, 128.0f), Vector2::Zero, 0.5f, 0.0f, Color::White, SpriteEffect::NONE);
-	
-	//OrbAnimator->PlaySequence(new Vector2(Graphics::GetViewportWidth() / 2.0f - 200, (Graphics::GetViewportHeight() - 280)), false, 0.3f);
+	SpriteBatch::Draw(Tile, new Vector2((Graphics::GetViewportWidth() / 2) + 300, (Graphics::GetViewportHeight() / 2) + 100), new Rect(3 * 512.0f, 3 * 512.0f, 510, 512), Vector2::Zero, 0.3f, 0.0f, Color::White, SpriteEffect::NONE);
 }
 
 void GameManager::DrawEnvironmentBack(int elapsedTime)
@@ -556,7 +636,7 @@ void GameManager::Jump()
 		Velocity->Y = -JumpForce;
 }
 
-void GameManager::Dash()
+void GameManager::Sprint()
 {
 	if (isFlipped)
 		Velocity->X = RunSpeed;
@@ -566,14 +646,15 @@ void GameManager::Dash()
 
 void GameManager::Damage(float damage)
 {
-	Audio::Play(S_Hit);
+	Audio::Play(SFX_Hit);
 	if (*Health > 0)
 	{
 		PState = PlayerState::Damage;
 
 		float N_HealthBar = R_HealthBar->Width / 250.0f;
-		*Health -= 0.08f;
-		R_HealthBar->Width = *Health * 250.0f;
+		*Health -= 0.06f;
+		if (R_HealthBar->Width > 0)
+			R_HealthBar->Width = *Health * 250.0f;
 	}
 	else
 	{
@@ -604,6 +685,10 @@ void GameManager::SetupCollisions()
 	PlatformCollider = new Collision(Collision::CollisionType::Static);
 	PlatformCollider->Rect->Height = 73 * 2;
 	PlatformCollider->Rect->Width = 73 * 4;
+
+	S_PlatformCollider = new Collision(Collision::CollisionType::Static);
+	S_PlatformCollider->Rect->Height = 143;
+	S_PlatformCollider->Rect->Width = 153;
 }
 
 void GameManager::DrawDebugs(bool draw)
@@ -614,28 +699,39 @@ void GameManager::DrawDebugs(bool draw)
 		GroundCollider->DrawDebug(Color(1.0f, 0.0f, 0.0f, 0.3f));
 		EdgePlatformCollider->DrawDebug(Color(0.0f, 1.0f, 0.0f, 0.3f));
 		PlatformCollider->DrawDebug(Color(0.0f, 1.0f, 0.0f, 0.3f));
-		Enemy->collision->DrawDebug(Color(1.0f, 0.0f, 0.0f, 0.3f));
+		S_PlatformCollider->DrawDebug(Color(0.0f, 1.0f, 0.0f, 0.3f));
+		AI_Monster->collision->DrawDebug(Color(1.0f, 0.0f, 0.0f, 0.3f));
+		AI_FreezingBlob->collision->DrawDebug(Color(1.0f, 0.0f, 0.0f, 0.3f));
 	}
-}
-
-int GameManager::random(int min, int max)
-{
-	static bool first = true;
-	if (first)
-	{
-		srand(time(NULL));
-		first = false;
-	}
-	return min + rand() % ((max + 1) - min);
 }
 
 void GameManager::AudioHanlder()
 {
 	BG_Music = new SoundEffect(true, 1.0f, 0.5f);
-	S_Whoosh = new SoundEffect(false, 1.0f, 1.0f);
-	S_Hit = new SoundEffect(false, 1.0f, 0.6f);
 	BG_Music->Load("Audio/BG_Music_Alt.wav");
-	S_Whoosh->Load("Audio/Whoosh1.wav");
-	S_Hit->Load("Audio/HitEffect.wav");
+
+	SFX_Whoosh = new SoundEffect(false, 1.0f, 1.0f);
+	SFX_Whoosh->Load("Audio/Whoosh1.wav");
+
+	SFX_Hit = new SoundEffect(false, 1.0f, 0.6f);
+	SFX_Hit->Load("Audio/HitEffect.wav");
+
+	SFX_Freeze = new SoundEffect(false, 1.0f, 0.6f);
+	SFX_Freeze->Load("Audio/FreezeSFX.wav");
+
 	Audio::Play(BG_Music);
+}
+
+void Unfreeze()
+{
+	GameManager::Instance->PState = GameManager::PlayerState::Idle;
+}
+
+void OnStay()
+{
+	if (GameManager::Instance->PState != GameManager::PlayerState::Frozen)
+	{
+		GameManager::Instance->PState = GameManager::PlayerState::Frozen;
+		Audio::Play(GameManager::Instance->SFX_Freeze);
+	}
 }

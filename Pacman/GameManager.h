@@ -30,13 +30,14 @@ class GameManager : public Game
 private:
 	// Data to represent Pacman
 #pragma region Textures
-	Texture2D* WizardTexture_Idle;
-	Texture2D* WizardTexture_Walk;
-	Texture2D* WizardTexture_Run;
-	Texture2D* WizardTexture_Jump;
-	Texture2D* WizardTexture_Damage;
-	Texture2D* T_PlayerDead;
-	Texture2D* _AttackTexture;
+	Texture2D* T_Player_Idle;
+	Texture2D* T_Player_Walk;
+	Texture2D* T_Player_Run;
+	Texture2D* T_Player_Jump;
+	Texture2D* T_Player_Damage;
+	Texture2D* T_Player_Dead;
+	Texture2D* T_Player_Frozen;
+	Texture2D* T_Player_Attack;
 	Texture2D* Platform;
 	Texture2D* Flower;
 	Texture2D* Tile;
@@ -50,6 +51,9 @@ private:
 	Texture2D* T_Monster_Idle;
 	Texture2D* T_Monster_Walk;
 	Texture2D* T_Monster_Attack;
+	Texture2D* T_Monster_Dead;
+
+	Texture2D* T_FreezingBlob_Idle;
 
 	Texture2D* _menuBackground;
 	Texture2D* T_PlayButton;
@@ -83,29 +87,26 @@ private:
 #pragma endregion
 
 #pragma region Animation Sequences
-	AnimationSequence* IdleAnimator;
-	AnimationSequence* WalkAnimator;
-	AnimationSequence* RunAnimator;
-	AnimationSequence* JumpAnimator;
-	AnimationSequence* AttackAnimator;
-	AnimationSequence* DamageAnimator;
+	AnimationSequence* A_Player_Idle;
+	AnimationSequence* A_Player_Walk;
+	AnimationSequence* A_Player_Run;
+	AnimationSequence* A_Player_Jump;
+	AnimationSequence* A_Player_Attack;
+	AnimationSequence* A_Player_Damage;
+
 	AnimationSequence* FlowerAnimator;
 	AnimationSequence* WindPlantAnimator;
 	AnimationSequence* GreenSlimeAnimator;
 	AnimationSequence* OrbAnimator;
 
-	AnimationSequence* MonsterIdleAnimator;
-	AnimationSequence* MonsterRunAnimator;
-	AnimationSequence* MonsterAttackAnimator;
+	AnimationSequence* A_Monster_Idle;
+	AnimationSequence* A_Monster_Walk;
+	AnimationSequence* A_Monster_Attack;
+
+	AnimationSequence* A_FreezingBlob_Idle;
 #pragma endregion
 
-#pragma region Audio & Sound FX
-	SoundEffect* BG_Music;
-	SoundEffect* S_Whoosh;
-	SoundEffect* S_Hit;
-#pragma endregion
-
-	const float WizardSpeed = 0.08f;
+	const float WitchSpeed = 0.08f;
 	const float RunSpeed = 0.8f;
 
 	Vector2* Velocity;
@@ -114,6 +115,8 @@ private:
 	int MenuSelection = 0;
 
 	CollisionManager* collisionManager;
+
+#pragma region Methods
 public:
 	/// <summary> Constructs the Pacman class. </summary>
 	GameManager(int argc, char* argv[]);
@@ -124,8 +127,9 @@ public:
 
 	/// <summary> All content should be loaded in this method. </summary>
 	void virtual LoadContent();
-
-	void virtual InitializeSequences();
+	void LoadPlayerTextutres();
+	void LoadAITextutres();
+	void InitializeSequences();
 
 	/// <summary> Called every frame - update game logic here. </summary>
 	void virtual Update(int elapsedTime);
@@ -137,32 +141,41 @@ public:
 	void virtual MenuDraw(int elapsedTime);
 	void virtual GameDraw(int elapsedTime);
 
-	void virtual DrawPlayerAnimation(int elapsedTime);
-	void virtual DrawEnvironmentFront(int elapsedTime);
-	void virtual DrawEnvironmentBack(int elapsedTime);
+	void DrawPlayerAnimation(int elapsedTime);
+	void DrawEnvironmentFront(int elapsedTime);
+	void DrawEnvironmentBack(int elapsedTime);
 
 	void virtual InputHandler(int elapsedTime);
 	void virtual MenuInput(Input::KeyboardState* KState, Input::MouseState* MState);
 	void virtual GameInput(Input::KeyboardState* KState, Input::MouseState* MState);
-	void virtual Jump();
-	void virtual Dash();
-	void virtual Damage(float damage);
-	void virtual SetupCollisions();
-	int random(int min, int max);
+	void Jump();
+	void Sprint();
+	void Damage(float damage);
+	void SetupCollisions();
 
-	void virtual AudioHanlder();
+	void AudioHanlder();
 
-	void virtual DrawDebugs(bool draw = false);
+	void DrawDebugs(bool draw = false);
+#pragma endregion
+
+#pragma region Audio & Sound FX
+	SoundEffect* BG_Music;
+	SoundEffect* SFX_Whoosh;
+	SoundEffect* SFX_Hit;
+	SoundEffect* SFX_Freeze;
+#pragma endregion
 
 #pragma region Collisions
 	Collision* PlayerCollider;
 	Collision* GroundCollider;
 	Collision* EdgePlatformCollider;
 	Collision* PlatformCollider;
+	Collision* S_PlatformCollider;
 #pragma endregion
 
 #pragma region AI Agents
-	AIAgent* Enemy;
+	AIAgent* AI_Monster;
+	AIAgent* AI_FreezingBlob;
 #pragma endregion
 
 	enum class PlayerState
@@ -187,7 +200,8 @@ public:
 	PlayerState PState = PlayerState::Idle;
 	GameState CurrentGameState = GameState::Menu;
 
-	Vector2* WizardPosition;
+	Vector2* WitchPosition;
 	float* Health;
 };
 #endif
+void OnStay();

@@ -13,6 +13,7 @@ Collision::Collision(CollisionType Type)
 		this->Type = Type;
 		CollisionManager::Instance->Collisions->push_back(this);
 	}
+	OnTriggerStay = &lul;
 }
 
 Collision::Collision()
@@ -62,4 +63,30 @@ bool Collision::IsInside(Vector2 point)
 {
 	return (point.X >= Rect->X && point.X < Rect->X + Rect->Width &&
 		point.Y >= Rect->Y && point.Y < Rect->Y + Rect->Height);
+}
+
+bool Collision::IsOverlapping(Collision& other)
+{
+	if (other.IsInside(Vector2(Rect->Right(), Rect->Top())))
+	{
+		return true;
+	}
+	else if (other.IsInside(Vector2(Rect->Left(), Rect->Bottom())))
+	{
+		return true;
+	}
+	else if (other.IsInside(Vector2(Rect->Right(), Rect->Bottom())))
+	{
+		return true;
+	}
+	else if (other.IsInside(Vector2(Rect->Left(), Rect->Top())))
+	{
+		return true;
+	}
+	return false;
+}
+
+void lul()
+{
+
 }

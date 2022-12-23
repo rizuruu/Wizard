@@ -1,14 +1,15 @@
 #include "AIAgent.h"
 #include <iostream>
 #include "GameManager.h"
-AIAgent::AIAgent()
+AIAgent::AIAgent(AI_Type Type, Vector2 pos)
 {
 	collision = new Collision(Collision::CollisionType::Dynamic);
-
+	Enemy_Type = Type;
 	velocity = new Vector2();
 	PrevPosition = new Vector2();
-	rect = new Rect(1300, 500, 170, 250);
+	rect = new Rect(pos.X, pos.Y, 250, 250);
 	collision->Rect = rect;
+	collision->Rect->X = rect->X + 100;
 
 	R_HealthBar = new Rect(rect->X + 70, rect->Y + 10, 180, 12);
 	Health = float(1.0f);
@@ -71,54 +72,66 @@ void AIAgent::UpdateAI(int elapsedTime)
 	else
 		velocity->Y = 0;
 
-	if (abs(rect->X - GameManager::Instance->WizardPosition->X) < 500.0f)
+	if (abs(rect->X - GameManager::Instance->WitchPosition->X) < 500.0f && abs(rect->Y - GameManager::Instance->WitchPosition->Y) < 100.0f)
 	{
-		if (rect->X - GameManager::Instance->WizardPosition->X > 0)
+		if (CurrentState == AIState::Dead)
+			return;
+
+		if (rect->X - GameManager::Instance->WitchPosition->X > 0)
 			isFlipped = false;
 		else 
 			isFlipped = true;
 
-		if (abs(rect->X - GameManager::Instance->WizardPosition->X) > 200.0f)
+		if (abs(rect->X - GameManager::Instance->WitchPosition->X) > 200.0f && Enemy_Type == AI_Type::Attack)
 		{
 			CurrentState = AIState::Walking;
-			rect->X = MathHelper::Lerp(rect->X, GameManager::Instance->WizardPosition->X, 0.02f);
+			rect->X = MathHelper::Lerp(rect->X, GameManager::Instance->WitchPosition->X, 0.02f);
 		}
 		else
 		{
 			if (GameManager::Instance->PState == GameManager::PlayerState::Dead)
 				CurrentState = AIState::Idle;
-			else
+			else if (Enemy_Type == AI_Type::Attack)
 				CurrentState = AIState::Attacking;
+			else
+			{
+				CurrentState = AIState::Idle;
+			}
 		}
 	}
 	else
-		CurrentState = AIState::Idle;
+	{
+		if (CurrentState == AIState::Dead)
+			return;
+		else
+			CurrentState = AIState::Idle;
+	}
 
 	R_HealthBar->X = rect->X + 70;
 	R_HealthBar->Y = rect->Y + 10;
-	cout << collision->OverlapSize->X << endl;
 }
 
-void AIAgent::DrawAI(AnimationSequence* IdleSequence, AnimationSequence* WalkSequence, AnimationSequence* AttackSequence)
+void AIAgent::DrawAI()
 {
-	//SpriteBatch::DrawRectangle(new Rect(rect->X, rect->Y + 10, 20, 30), Color::White); //0.443, 0.761, 0.788
-	//SpriteBatch::DrawRectangle(new Rect(25, 30, 250, 20), new Color(0.0f, 0.0f, 0.0f, 0.5f)); //0.443, 0.761, 0.788
-	SpriteBatch::DrawRectangle(R_HealthBar, new Color(0.0f, 0.0f, 0.0f, 0.5f)); //0.443, 0.761, 0.788
-	SpriteBatch::DrawRectangle(R_HealthBar, Color::Green); //0.443, 0.761, 0.788
+	SpriteBatch::DrawRectangle(R_HealthBar, new Color(0.0f, 0.0f, 0.0f, 0.5f)); 
+	SpriteBatch::DrawRectangle(R_HealthBar, new Color(1.2 - Health, Health, 0.0f));
 
 	switch (CurrentState)
 	{
 	case AIAgent::AIState::Idle:
-		IdleSequence->PlaySequence(new Vector2(rect->X, rect->Y), isFlipped, 0.7f);
+		A_Idle->PlaySequence(new Vector2(rect->X, rect->Y), isFlipped, 0.7f);
 		break;
 	case AIAgent::AIState::Walking:
-		WalkSequence->PlaySequence(new Vector2(rect->X, rect->Y), isFlipped, 0.7f);
+		A_Walk->PlaySequence(new Vector2(rect->X, rect->Y), isFlipped, 0.7f);
 		break;
 	case AIAgent::AIState::Attacking:
-		if (AttackSequence->PlaySequenceOnce(new Vector2(rect->X, rect->Y), isFlipped, 0.7f))
+		if (A_Attack->PlaySequenceOnce(new Vector2(rect->X, rect->Y), isFlipped, 0.7f))
 		{
 			GameManager::Instance->Damage(0.0f);
 		}
+		break;
+	case AIAgent::AIState::Dead:
+		SpriteBatch::Draw(T_Dead, new Vector2(rect->X, rect->Y), new Rect(0, 0, 480, 480), Vector2::Zero, 0.7f, 0.0f, Color::White, isFlipped ? SpriteEffect::FLIPHORIZONTAL : SpriteEffect::NONE);
 		break;
 	default:
 		break;
@@ -127,7 +140,7 @@ void AIAgent::DrawAI(AnimationSequence* IdleSequence, AnimationSequence* WalkSeq
 
 void AIAgent::Damage(float damage)
 {
-	if (abs(rect->X - GameManager::Instance->WizardPosition->X) <= 200.0f)
+	if (abs(rect->X - GameManager::Instance->WitchPosition->X) <= 200.0f)
 	{
 		if (Health > 0)
 		{
@@ -136,7 +149,7 @@ void AIAgent::Damage(float damage)
 		}
 		else
 		{
-			//PState = PlayerState::Dead;
+			CurrentState = AIState::Dead;
 		}
 	}
 }

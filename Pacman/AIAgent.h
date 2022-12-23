@@ -8,7 +8,14 @@ private:
 	bool isFlipped;
 	float Health;
 public:
+	enum class AI_Type
+	{
+		Trigger,
+		Attack,
+	};
+
 	AIAgent();
+	AIAgent(AI_Type Type, Vector2 pos = Vector2(1300, 500));
 	~AIAgent();
 
 	enum class AIState
@@ -30,6 +37,7 @@ public:
 	AnimationSequence* A_Dead;
 
 	AIState CurrentState = AIState::Idle;
+	AI_Type Enemy_Type = AI_Type::Attack;
 	Vector2* velocity;
 	Vector2* PrevPosition;
 	Collision* collision;
@@ -37,6 +45,6 @@ public:
 	Rect* R_HealthBar;
 
 	void UpdateAI(int elapsedTime);
-	void DrawAI(AnimationSequence* IdleSequence, AnimationSequence* WalkSequence, AnimationSequence* AttackSequence);
+	void DrawAI();
 	void Damage(float damage);
 };
